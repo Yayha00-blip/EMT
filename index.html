@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EMT — Commandement Formateurs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:         #0c0e0b;
+      --bg2:        #111410;
+      --bg3:        #161a14;
+      --panel:      #1a1e17;
+      --panel2:     #1f2419;
+      --border:     rgba(120,160,80,0.15);
+      --border2:    rgba(120,160,80,0.08);
+      --olive:      #6b8c42;
+      --olive-lt:   #8ab050;
+      --olive-glow: rgba(107,140,66,0.18);
+      --amber:      #d4920a;
+      --amber-soft: rgba(212,146,10,0.12);
+      --red:        #c0392b;
+      --red-soft:   rgba(192,57,43,0.12);
+      --cyan:       #3ab8c4;
+      --cyan-soft:  rgba(58,184,196,0.12);
+      --text:       #d8dfd0;
+      --text2:      #9aa68a;
+      --text3:      #5a6650;
+      --mono:       'IBM Plex Mono', monospace;
+      --display:    'Bebas Neue', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--mono);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
+    }
+
+    /* ─── LAYOUT ────────────────────────────────────────── */
+    .layout {
+      position: relative; z-index: 1;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      min-height: 100vh;
+    }
+
+    /* ─── SIDEBAR ───────────────────────────────────────── */
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+    }
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--olive); }
+
+    .sb-topband {
+      padding: 0 20px; height: 44px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--olive);
+    }
+    .sb-topband-text { font-family: var(--display); font-size: 0.85rem; letter-spacing: 0.2em; color: #0c0e0b; }
+    .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #0c0e0b; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(12,14,11,0.6)} 50%{box-shadow:0 0 0 5px rgba(12,14,11,0)} }
+
+    .sb-logo { padding: 20px 20px 14px; border-bottom: 1px solid var(--border); }
+    .sb-codename { font-size: 0.6rem; letter-spacing: 0.25em; color: var(--olive-lt); text-transform: uppercase; margin-bottom: 8px; }
+    .sb-title { font-family: var(--display); font-size: 2.2rem; line-height: 0.9; letter-spacing: 0.04em; color: var(--text); }
+    .sb-title span { color: var(--olive-lt); }
+    .sb-sub { margin-top: 8px; font-size: 0.62rem; color: var(--text3); letter-spacing: 0.08em; }
+
+    .sb-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; border-bottom: 1px solid var(--border); }
+    .sb-stat { padding: 12px 8px; text-align: center; border-right: 1px solid var(--border2); position: relative; }
+    .sb-stat:last-child { border-right: none; }
+    .sb-stat::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:var(--olive); }
+    .sb-stat strong { display: block; font-family: var(--display); font-size: 1.8rem; letter-spacing: 0.04em; color: var(--olive-lt); line-height: 1; }
+    .sb-stat span { font-size: 0.58rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; }
+
+    /* SEARCH */
+    .sb-section { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    .sb-section-label { font-size: 0.58rem; letter-spacing: 0.2em; color: var(--olive); text-transform: uppercase; margin-bottom: 8px; }
+    .search-box { position: relative; }
+    #searchInput {
+      width: 100%; padding: 9px 30px 9px 10px;
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text); font: 500 0.76rem var(--mono); letter-spacing: 0.04em;
+      outline: none; transition: border-color 0.2s, background 0.2s;
+    }
+    #searchInput::placeholder { color: var(--text3); }
+    #searchInput:focus { border-color: var(--olive); background: var(--panel2); box-shadow: 0 0 0 2px var(--olive-glow); }
+    #clearBtn {
+      position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: var(--text3);
+      font-size: 1.1rem; cursor: pointer; padding: 4px; transition: color 0.2s;
+    }
+    #clearBtn:hover { color: var(--amber); }
+    #clearBtn.hidden { display: none; }
+
+    /* REGION NAV */
+    .sb-nav { padding: 0 8px 10px; display: grid; gap: 2px; }
+    .region-btn {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; padding: 8px 10px;
+      background: none; border: 1px solid transparent;
+      color: var(--text3); font: 500 0.7rem var(--mono);
+      letter-spacing: 0.06em; text-transform: uppercase;
+      cursor: pointer; text-align: left; transition: all 0.15s; gap: 8px;
+    }
+    .region-btn:hover { color: var(--text); background: var(--panel); border-color: var(--border); }
+    .region-btn.active { color: var(--olive-lt); background: var(--olive-glow); border-color: var(--olive); }
+    .region-btn-left { display: flex; align-items: center; gap: 7px; }
+    .region-indicator { width: 5px; height: 5px; border-radius: 50%; background: var(--text3); flex-shrink: 0; transition: background 0.2s; }
+    .region-btn.active .region-indicator { background: var(--olive-lt); }
+    .r-count { font-size: 0.62rem; padding: 2px 6px; background: var(--bg3); color: var(--text3); border: 1px solid var(--border2); flex-shrink: 0; }
+    .region-btn.active .r-count { background: var(--olive); color: #0c0e0b; border-color: var(--olive); }
+
+    /* FORMATION FILTER */
+    .formation-filter-list { padding: 0 8px 10px; display: grid; gap: 2px; }
+    .form-filter-btn {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; padding: 7px 10px;
+      background: none; border: 1px solid transparent;
+      color: var(--text3); font: 400 0.68rem var(--mono);
+      letter-spacing: 0.04em; text-transform: uppercase;
+      cursor: pointer; text-align: left; transition: all 0.15s; gap: 8px;
+    }
+    .form-filter-btn:hover { color: var(--text); background: var(--panel); border-color: var(--border); }
+    .form-filter-btn.active { color: var(--cyan); background: var(--cyan-soft); border-color: rgba(58,184,196,0.3); }
+    .form-filter-btn-left { display: flex; align-items: center; gap: 7px; }
+    .form-indicator { width: 5px; height: 5px; border-radius: 50%; background: var(--text3); flex-shrink: 0; transition: background 0.2s; }
+    .form-filter-btn.active .form-indicator { background: var(--cyan); }
+    .f-count { font-size: 0.6rem; padding: 2px 6px; background: var(--bg3); color: var(--text3); border: 1px solid var(--border2); flex-shrink: 0; }
+    .form-filter-btn.active .f-count { background: var(--cyan); color: #0c0e0b; border-color: var(--cyan); }
+    .no-formations-msg { padding: 8px 10px; font-size: 0.65rem; color: var(--text3); font-style: italic; }
+
+    .sb-footer { margin-top: auto; padding: 12px 16px; border-top: 1px solid var(--border); font-size: 0.58rem; color: var(--text3); letter-spacing: 0.08em; flex-shrink: 0; }
+    .sb-footer span { color: var(--olive); }
+
+    /* ─── MAIN ──────────────────────────────────────────── */
+    .main { display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 44px;
+      background: var(--bg2); border-bottom: 1px solid var(--border); gap: 20px;
+    }
+    .breadcrumb { font-size: 0.65rem; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; }
+    .breadcrumb span { color: var(--olive-lt); }
+    .topbar-status { display: flex; align-items: center; gap: 8px; font-size: 0.65rem; color: var(--text3); letter-spacing: 0.08em; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--olive-lt); animation: blink 3s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    #resultCount { color: var(--olive-lt); font-weight: 600; }
+
+    .page-head { padding: 28px 32px 20px; border-bottom: 1px solid var(--border2); }
+    .pg-eyebrow { display: flex; align-items: center; gap: 10px; font-size: 0.62rem; letter-spacing: 0.2em; color: var(--olive); text-transform: uppercase; margin-bottom: 10px; }
+    .pg-eyebrow::before { content:''; display:block; width:24px; height:1px; background:var(--olive); }
+    .pg-title { font-family: var(--display); font-size: 2.8rem; letter-spacing: 0.06em; line-height: 0.9; color: var(--text); }
+    .pg-title em { color: var(--olive-lt); font-style: normal; }
+    .pg-meta { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .pg-tag { font-size: 0.62rem; color: var(--text3); padding: 3px 9px; border: 1px solid var(--border2); background: var(--panel); }
+    .pg-tag b { color: var(--amber); }
+
+    /* ACTIVE FILTER BANNER */
+    .filter-banner {
+      display: none;
+      align-items: center; justify-content: space-between;
+      padding: 8px 32px;
+      background: var(--cyan-soft);
+      border-bottom: 1px solid rgba(58,184,196,0.2);
+      font-size: 0.68rem; color: var(--cyan); letter-spacing: 0.08em;
+      gap: 16px;
+    }
+    .filter-banner.visible { display: flex; }
+    .filter-banner-clear {
+      background: none; border: 1px solid rgba(58,184,196,0.3); color: var(--cyan);
+      font: 500 0.65rem var(--mono); padding: 3px 10px; cursor: pointer;
+      letter-spacing: 0.08em; transition: background 0.15s;
+    }
+    .filter-banner-clear:hover { background: rgba(58,184,196,0.15); }
+
+    .content { padding: 24px 32px; flex: 1; }
+
+    /* ─── REGION BLOCK ──────────────────────────────────── */
+    .region-section { margin-bottom: 22px; border: 1px solid var(--border); background: var(--panel); animation: fadeIn 0.3s ease both; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    .region-head { display: flex; align-items: stretch; border-bottom: 1px solid var(--border); }
+    .region-accent-bar { width: 4px; background: var(--olive); flex-shrink: 0; }
+    .region-head-inner { flex: 1; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .region-head-title { font-family: var(--display); font-size: 1.4rem; letter-spacing: 0.1em; color: var(--text); }
+    .region-head-right { display: flex; gap: 8px; align-items: center; }
+    .rh-chip { font-size: 0.6rem; letter-spacing: 0.1em; padding: 3px 9px; border: 1px solid var(--border); color: var(--text3); text-transform: uppercase; background: var(--bg3); }
+    .rh-chip.hi { color: var(--olive-lt); border-color: var(--olive); background: var(--olive-glow); }
+
+    .units-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 1px; background: var(--border2); }
+    .unit-cell { background: var(--bg2); padding: 14px 16px; }
+    .unit-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border2); gap: 8px; }
+    .unit-name { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text2); }
+    .unit-count { font-family: var(--display); font-size: 1.1rem; letter-spacing: 0.06em; color: var(--amber); }
+
+    /* TRAINER ROW */
+    .trainer-list { display: grid; gap: 5px; }
+    .trainer-row {
+      padding: 7px 10px 7px 10px;
+      background: var(--bg3); border: 1px solid transparent;
+      cursor: default; transition: border-color 0.15s, background 0.15s;
+    }
+    .trainer-row:hover { border-color: var(--border); background: var(--panel); }
+    .trainer-row-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .tr-left { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+    .tr-name { font-size: 0.73rem; font-weight: 500; color: var(--text); letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tr-grade { font-family: var(--display); font-size: 0.82rem; letter-spacing: 0.08em; padding: 2px 7px; flex-shrink: 0; }
+    .g-LT    { color:#7eb8d4; border:1px solid rgba(126,184,212,0.3); background:rgba(126,184,212,0.08); }
+    .g-CNE   { color:#7dd4a0; border:1px solid rgba(125,212,160,0.3); background:rgba(125,212,160,0.08); }
+    .g-CAP   { color:#d4b07d; border:1px solid rgba(212,176,125,0.3); background:rgba(212,176,125,0.08); }
+    .g-ADJ   { color:var(--olive-lt); border:1px solid rgba(138,176,80,0.3); background:var(--olive-glow); }
+    .g-CDT   { color:#c4a8e0; border:1px solid rgba(196,168,224,0.3); background:rgba(196,168,224,0.08); }
+    .g-SGT   { color:#e09898; border:1px solid rgba(224,152,152,0.3); background:rgba(224,152,152,0.08); }
+    .g-MED   { color:#f0d080; border:1px solid rgba(240,208,128,0.3); background:rgba(240,208,128,0.08); }
+    .g-INF   { color:#80d4d4; border:1px solid rgba(128,212,212,0.3); background:rgba(128,212,212,0.08); }
+    .g-OTHER { color:var(--text3); border:1px solid var(--border); background:var(--bg3); }
+
+    /* FORMATIONS TAGS on trainer */
+    .trainer-formations { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+    .formation-tag {
+      font-size: 0.6rem; padding: 2px 7px; letter-spacing: 0.06em;
+      background: var(--cyan-soft); color: var(--cyan);
+      border: 1px solid rgba(58,184,196,0.25);
+      text-transform: uppercase; white-space: nowrap;
+    }
+
+    /* ADD FORMATION BUTTON */
+    .btn-add-formation {
+      display: inline-flex; align-items: center; gap: 5px;
+      margin-top: 6px;
+      font: 400 0.62rem var(--mono); letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text3); background: none;
+      border: 1px dashed rgba(255,255,255,0.1);
+      padding: 3px 8px; cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-add-formation:hover { color: var(--olive-lt); border-color: var(--olive); }
+    .btn-add-formation .plus { font-size: 0.9rem; line-height: 1; }
+
+    mark { background: rgba(212,146,10,0.25); color: var(--amber); border-radius: 1px; padding: 0 1px; }
+
+    .empty-state { padding: 80px 32px; text-align: center; color: var(--text3); font-size: 0.85rem; letter-spacing: 0.1em; }
+    .empty-state .ei { font-family: var(--display); font-size: 4rem; color: var(--border); display: block; margin-bottom: 12px; }
+    .empty-state.hidden { display: none; }
+
+    /* ─── MODAL ─────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      width: 100%; max-width: 520px;
+      max-height: 90vh; overflow-y: auto;
+      transform: translateY(16px);
+      transition: transform 0.2s;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+
+    .modal-header {
+      display: flex; align-items: start; justify-content: space-between;
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+    }
+    .modal-header-info {}
+    .modal-officer-grade {
+      font-size: 0.6rem; letter-spacing: 0.2em; color: var(--olive); text-transform: uppercase; margin-bottom: 6px;
+    }
+    .modal-officer-name {
+      font-family: var(--display); font-size: 1.5rem; letter-spacing: 0.06em; color: var(--text);
+    }
+    .modal-officer-meta { font-size: 0.65rem; color: var(--text3); margin-top: 4px; }
+    .modal-close {
+      background: none; border: 1px solid var(--border); color: var(--text3);
+      font-size: 1.1rem; width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0; transition: color 0.2s, border-color 0.2s;
+    }
+    .modal-close:hover { color: var(--text); border-color: var(--text3); }
+
+    .modal-body { padding: 18px 20px; }
+
+    .modal-section-title {
+      font-size: 0.6rem; letter-spacing: 0.2em; color: var(--olive); text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    /* EXISTING FORMATIONS LIST IN MODAL */
+    .modal-formations-list { display: grid; gap: 6px; margin-bottom: 16px; min-height: 20px; }
+    .modal-formation-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 12px;
+      background: var(--bg3); border: 1px solid var(--border);
+      gap: 10px;
+    }
+    .modal-formation-name { font-size: 0.75rem; color: var(--text); letter-spacing: 0.04em; }
+    .modal-formation-year { font-size: 0.65rem; color: var(--amber); }
+    .btn-remove-formation {
+      background: none; border: none; color: var(--text3);
+      font-size: 0.8rem; cursor: pointer; padding: 2px 6px;
+      transition: color 0.2s;
+    }
+    .btn-remove-formation:hover { color: var(--red); }
+    .modal-no-formations { font-size: 0.72rem; color: var(--text3); font-style: italic; padding: 8px 0; }
+
+    /* ADD FORM IN MODAL */
+    .modal-add-form {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      padding: 14px;
+    }
+    .modal-add-title {
+      font-size: 0.6rem; letter-spacing: 0.2em; color: var(--amber); text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .modal-fields { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-bottom: 10px; }
+    .modal-fields-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .modal-input, .modal-select {
+      padding: 9px 10px;
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text); font: 500 0.75rem var(--mono);
+      outline: none; width: 100%;
+      transition: border-color 0.2s;
+    }
+    .modal-input::placeholder { color: var(--text3); }
+    .modal-input:focus, .modal-select:focus { border-color: var(--olive); box-shadow: 0 0 0 2px var(--olive-glow); }
+    .modal-select { cursor: pointer; }
+    .modal-select option { background: var(--bg2); }
+
+    .btn-modal-add {
+      width: 100%;
+      padding: 10px;
+      background: var(--olive-glow);
+      border: 1px solid var(--olive);
+      color: var(--olive-lt);
+      font: 600 0.72rem var(--mono);
+      letter-spacing: 0.15em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-modal-add:hover { background: rgba(107,140,66,0.3); }
+
+    /* STAGGER */
+    .region-section:nth-child(1){animation-delay:0ms}
+    .region-section:nth-child(2){animation-delay:50ms}
+    .region-section:nth-child(3){animation-delay:100ms}
+    .region-section:nth-child(4){animation-delay:150ms}
+    .region-section:nth-child(5){animation-delay:200ms}
+    .region-section:nth-child(6){animation-delay:250ms}
+    .region-section:nth-child(7){animation-delay:300ms}
+    .region-section:nth-child(8){animation-delay:350ms}
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: var(--border); }
+
+    @media(max-width:900px){
+      .layout{grid-template-columns:1fr;}
+      .sidebar{position:relative;height:auto;}
+      .pg-title{font-size:2rem;}
+      .content,.topbar{padding-left:16px;padding-right:16px;}
+      .page-head,.filter-banner{padding-left:16px;padding-right:16px;}
+    }
+    @media(max-width:600px){
+      .region-head-right{display:none;}
+      .units-grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar">
+    <div class="sb-topband">
+      <span class="sb-topband-text">SYSTÈME OPÉRATIONNEL</span>
+      <div class="live-dot"></div>
+    </div>
+
+    <div class="sb-logo">
+      <p class="sb-codename">Protection Civile · Maroc</p>
+      <h1 class="sb-title">EMT<br><span>FORMATEURS</span></h1>
+      <p class="sb-sub">SESSION MOIS 4 · ANNUAIRE NATIONAL</p>
+    </div>
+
+    <div class="sb-stats">
+      <div class="sb-stat"><strong id="totalStat">0</strong><span>effectif</span></div>
+      <div class="sb-stat"><strong id="regionStat">0</strong><span>régions</span></div>
+      <div class="sb-stat"><strong id="unitStat">0</strong><span>unités</span></div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="sb-section">
+      <div class="sb-section-label">▸ Recherche</div>
+      <div class="search-box">
+        <input id="searchInput" type="search" placeholder="Nom · Grade · Unité…" autocomplete="off"/>
+        <button id="clearBtn" class="hidden">×</button>
+      </div>
+    </div>
+
+    <!-- REGION NAV -->
+    <div class="sb-section" style="padding-bottom:4px;">
+      <div class="sb-section-label">▸ Régions</div>
+    </div>
+    <nav class="sb-nav" id="regionNav"></nav>
+
+    <!-- FORMATION FILTER -->
+    <div class="sb-section" style="padding-bottom:4px; border-top:1px solid var(--border);">
+      <div class="sb-section-label" style="color:var(--cyan);">▸ Filtre · Formations</div>
+    </div>
+    <div class="formation-filter-list" id="formationFilterList">
+      <div class="no-formations-msg">Aucune formation enregistrée</div>
+    </div>
+
+    <div class="sb-footer">
+      PROG. EMT · 3 SEMAINES · 120H · <span>40% THÉORIE / 60% PRATIQUE</span>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ═══ -->
+  <div class="main">
+    <div class="topbar">
+      <span class="breadcrumb">EMT · <span id="activeCrumb">TOUTES RÉGIONS</span></span>
+      <div class="topbar-status">
+        <div class="status-dot"></div>
+        <span id="resultCount">0</span>&nbsp;formateur(s)
+      </div>
+    </div>
+
+    <!-- ACTIVE FORMATION FILTER BANNER -->
+    <div class="filter-banner" id="filterBanner">
+      <span>▸ FILTRE FORMATION ACTIF : <strong id="bannerFormName"></strong></span>
+      <button class="filter-banner-clear" id="bannerClearBtn">EFFACER FILTRE</button>
+    </div>
+
+    <div class="page-head">
+      <div class="pg-eyebrow">Annuaire National — Session Mois 4</div>
+      <h2 class="pg-title">ÉQUIPE <em>EMT</em><br>PAR RÉGION</h2>
+      <div class="pg-meta">
+        <span class="pg-tag">Durée <b>3 semaines</b></span>
+        <span class="pg-tag">Volume <b>120 heures</b></span>
+        <span class="pg-tag">Horaire <b>09h – 17h</b></span>
+        <span class="pg-tag">Sites <b>ENPC · CPPC Fès</b></span>
+      </div>
+    </div>
+
+    <div class="content">
+      <div id="groupsWrap"></div>
+      <div id="emptyState" class="empty-state hidden">
+        <span class="ei">[ 0 ]</span>AUCUN RÉSULTAT TROUVÉ
+      </div>
+    </div>
+  </div>
+
+</div><!-- /layout -->
+
+<!-- ═══ MODAL ═══ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-header-info">
+        <div class="modal-officer-grade" id="modalGrade"></div>
+        <div class="modal-officer-name" id="modalName"></div>
+        <div class="modal-officer-meta" id="modalMeta"></div>
+      </div>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section-title">▸ Formations effectuées</div>
+      <div class="modal-formations-list" id="modalFormationsList"></div>
+
+      <div class="modal-add-form">
+        <div class="modal-add-title">+ Ajouter une formation</div>
+        <div class="modal-fields">
+          <input class="modal-input" id="formInput" placeholder="Nom de la formation…" autocomplete="off"/>
+        </div>
+        <div class="modal-fields-row2">
+          <input class="modal-input" id="formYear" placeholder="Année (ex: 2024)" type="number" min="2000" max="2099"/>
+          <select class="modal-select" id="formType">
+            <option value="">Type (optionnel)</option>
+            <option value="EMT">EMT</option>
+            <option value="SECOURISME">Secourisme</option>
+            <option value="SAUVETAGE">Sauvetage</option>
+            <option value="MÉDICAL">Médical</option>
+            <option value="COMMANDEMENT">Commandement</option>
+            <option value="TECHNIQUE">Technique</option>
+            <option value="AUTRE">Autre</option>
+          </select>
+        </div>
+        <button class="btn-modal-add" id="btnModalAdd">ENREGISTRER LA FORMATION</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─── DATA ─────────────────────────────────────────────── */
+const TRAINERS = [
+  {name:"ZIANI MEKKI",grade:"LT",unit:"MOHAMMADIA",region:"CASABLANCA-SETTAT"},
+  {name:"CHAIBI NOUREDDINE",grade:"LT",unit:"UMRI CASA SETTAT",region:"CASABLANCA-SETTAT"},
+  {name:"EL AYADI AMROU",grade:"CNE",unit:"AIN CHOCK",region:"CASABLANCA-SETTAT"},
+  {name:"ZAMMAT MAROUANE",grade:"CNE",unit:"AIN CHOCK",region:"CASABLANCA-SETTAT"},
+  {name:"BELAGHROUS EL MEHDI",grade:"LT",unit:"AIN CHOCK",region:"CASABLANCA-SETTAT"},
+  {name:"EL ABKARI MOHAMED",grade:"CNE",unit:"AIN SEBAA",region:"CASABLANCA-SETTAT"},
+  {name:"YAMOUL FATIMA ZOHRA",grade:"MEDECIN",unit:"AIN SEBAA",region:"CASABLANCA-SETTAT"},
+  {name:"YASYN SFIA",grade:"INFIRMIERE",unit:"AIN SEBAA",region:"CASABLANCA-SETTAT"},
+  {name:"EL MOUDNI SIFEDDINE",grade:"LT",unit:"AIN SEBAA",region:"CASABLANCA-SETTAT"},
+  {name:"MOUGNI AYOUB",grade:"LT",unit:"ANFA",region:"CASABLANCA-SETTAT"},
+  {name:"ABATOURAB LARBI",grade:"CNE",unit:"BEN M'SIK",region:"CASABLANCA-SETTAT"},
+  {name:"ELKARIMA HANANE",grade:"MEDECIN",unit:"BENM'SIK",region:"CASABLANCA-SETTAT"},
+  {name:"BOUCHTI YASSIR",grade:"CNE",unit:"BERNOUSSI",region:"CASABLANCA-SETTAT"},
+  {name:"GOUNETTI SARA",grade:"MEDECIN",unit:"CASA ANFA",region:"CASABLANCA-SETTAT"},
+  {name:"AGUINAN IMANE",grade:"INFIRMIERE",unit:"EL FIDA",region:"CASABLANCA-SETTAT"},
+  {name:"EL KHALFI ZAKARIA",grade:"LT",unit:"ELJADIDA",region:"CASABLANCA-SETTAT"},
+  {name:"ERREBAHI MOHAMED",grade:"LT",unit:"MLY RACHID",region:"CASABLANCA-SETTAT"},
+  {name:"BEGRAOUI MOHAMMED",grade:"ADJ",unit:"MOHAMMADIA",region:"CASABLANCA-SETTAT"},
+  {name:"EL HARIT ABDESSAMAD",grade:"LT",unit:"POSTE AIN DIAB",region:"CASABLANCA-SETTAT"},
+  {name:"ANASS KROUIT",grade:"LT",unit:"SIDI BERNOUSSI",region:"CASABLANCA-SETTAT"},
+  {name:"TAHIR ABDELLATIF",grade:"ADJ",unit:"Non précisé",region:"CASABLANCA-SETTAT"},
+  {name:"MALKI AYOUB",grade:"ADJ",unit:"Non précisé",region:"CASABLANCA-SETTAT"},
+  {name:"AZEROUAL YAACOUB",grade:"LT",unit:"MIDELT",region:"DRÂA-TAFILALET"},
+  {name:"MABROUR HAMZA",grade:"ADJ",unit:"CPPC FES",region:"FES-MEKNES"},
+  {name:"HAMMANI ALI",grade:"LT",unit:"ELHAJEB",region:"FES-MEKNES"},
+  {name:"DANANIR MOHAMED",grade:"ADJ/C",unit:"FES",region:"FES-MEKNES"},
+  {name:"BOUHTAT MOUHSSINE",grade:"ADJ/C",unit:"FES",region:"FES-MEKNES"},
+  {name:"SAIM WALID",grade:"LT",unit:"SEFROU",region:"FES-MEKNES"},
+  {name:"KOUIRI ABDELALI",grade:"ADJ",unit:"UMRI FES MEKNES",region:"FES-MEKNES"},
+  {name:"MRABEJ SAMIR",grade:"ADJ",unit:"Non précisé",region:"FES-MEKNES"},
+  {name:"LAKHZAIBI MOHAMMED",grade:"ADJ",unit:"Non précisé",region:"FES-MEKNES"},
+  {name:"IBARZAQ YOUSSEF",grade:"ADJ",unit:"CHICHAOUA",region:"MARRAKECH-SAFI"},
+  {name:"DACHROUNE ACHRAF",grade:"ADJ",unit:"CS AIT OURIR",region:"MARRAKECH-SAFI"},
+  {name:"EL-MONTASER IBRAHIM",grade:"ADJ",unit:"KALAA SERAGHNA",region:"MARRAKECH-SAFI"},
+  {name:"CHELLOUL MOURAD",grade:"ADJ/C",unit:"SAFI",region:"MARRAKECH-SAFI"},
+  {name:"EL MOUINE YACINE",grade:"ADJ/C",unit:"UMRI MARAKKECH SAFI",region:"MARRAKECH-SAFI"},
+  {name:"OUTMANE MAZZI",grade:"CAP",unit:"UMRI MARAKKECH SAFI",region:"MARRAKECH-SAFI"},
+  {name:"YACINE ELMOUINE",grade:"ADJ",unit:"UMRI MARRAKECH SAFI",region:"MARRAKECH-SAFI"},
+  {name:"OUSSAMA BLAOUALI",grade:"CAP",unit:"Non précisé",region:"MARRAKECH-SAFI"},
+  {name:"LMATAI KHALID",grade:"ADJ",unit:"Non précisé",region:"MARRAKECH-SAFI"},
+  {name:"ELBOUKY SOUFIANE",grade:"SGT/C",unit:"Non précisé",region:"MARRAKECH-SAFI"},
+  {name:"AZAOUI KAMAL",grade:"CDT",unit:"DAR ESSALAM2",region:"NON-PRECISÉ"},
+  {name:"IDALI KARIM",grade:"CDT",unit:"DGPC",region:"NON-PRECISÉ"},
+  {name:"EL KAOURI AHMED",grade:"LT",unit:"DGPC",region:"NON-PRECISÉ"},
+  {name:"EL GHAYOUBI MOHAMED",grade:"LT",unit:"ENPC",region:"NON-PRECISÉ"},
+  {name:"ECH-CHNA SAFAA",grade:"MEDECIN",unit:"ENPC",region:"NON-PRECISÉ"},
+  {name:"KHALIDY ANASS",grade:"LT",unit:"ENPC",region:"NON-PRECISÉ"},
+  {name:"AMCHRA YOUSSEF",grade:"LT",unit:"ENPC",region:"NON-PRECISÉ"},
+  {name:"LAKHAL BOUBKER",grade:"ADJ",unit:"ENPC",region:"NON-PRECISÉ"},
+  {name:"ELGHAYOUBI ABDELHADI",grade:"ADJ",unit:"ENPC",region:"NON-PRECISÉ"},
+  {name:"BOUHCINA MBARK",grade:"LT",unit:"UMNI",region:"NON-PRECISÉ"},
+  {name:"ELGHOUL ABDERRAHIM",grade:"ADJ",unit:"UMNI",region:"NON-PRECISÉ"},
+  {name:"EL KHYARI TARIK",grade:"CDT",unit:"UNMI",region:"NON-PRECISÉ"},
+  {name:"MBARKI MUSTAPHA",grade:"LT",unit:"CS MASSIRA",region:"RABAT-SALE-KENITRA"},
+  {name:"MISAB IMANE",grade:"MEDECIN",unit:"KENITRA",region:"RABAT-SALE-KENITRA"},
+  {name:"BOUCHRA RACHID",grade:"INFIRMIERE",unit:"KENITRA",region:"RABAT-SALE-KENITRA"},
+  {name:"FRAINE HASSAN",grade:"LT",unit:"KENITRA",region:"RABAT-SALE-KENITRA"},
+  {name:"ZIANI MOHAMMED",grade:"LT",unit:"RABAT",region:"RABAT-SALE-KENITRA"},
+  {name:"HASSAN BEN SALAH",grade:"INF",unit:"RABAT",region:"RABAT-SALE-KENITRA"},
+  {name:"MOHAMMED HARROUCHI",grade:"LT",unit:"SALE",region:"RABAT-SALE-KENITRA"},
+  {name:"RIAFI MOHAMED",grade:"LT",unit:"SIDI KACEM",region:"RABAT-SALE-KENITRA"},
+  {name:"OUBRAHIM HAMZA",grade:"LT",unit:"SIDI SLIMANE",region:"RABAT-SALE-KENITRA"},
+  {name:"OUSSAMA ZAKARIA",grade:"CAP",unit:"SKHIRAT TEMARA",region:"RABAT-SALE-KENITRA"},
+  {name:"TORCHI THAMI",grade:"ADJ",unit:"UMRI RABAT SALE KENITRA",region:"RABAT-SALE-KENITRA"},
+  {name:"MOURTAZIK WASSIM",grade:"CAP",unit:"Non précisé",region:"RABAT-SALE-KENITRA"},
+  {name:"BEN ADDI ABDELILAH",grade:"LT",unit:"AGADIR IDA OUTANAN",region:"SOUSS-MASSA"},
+  {name:"BOUGLADA SOULIMAN",grade:"LT",unit:"AGADIR IDA OUTANAN",region:"SOUSS-MASSA"},
+  {name:"OUKALOUCH SAMI",grade:"LT",unit:"CHTOUKA AIT BAHA",region:"SOUSS-MASSA"},
+  {name:"BOUFIKR MAROUAN",grade:"ADJ",unit:"INEZGANE AIT MELLOUL",region:"SOUSS-MASSA"},
+  {name:"AFRYAD YOUSSEF",grade:"ADJ",unit:"TATA",region:"SOUSS-MASSA"},
+  {name:"KHALIL LAHNOUNE",grade:"LT",unit:"UMRI SOUS MASSA",region:"SOUSS-MASSA"},
+  {name:"JELLOULI FAYCAL",grade:"SGT/C",unit:"CPPC TANGER ASSILAH",region:"TANGER-TETOUAN-AL HOCEIMA"},
+  {name:"ILYAS BOUJIDA",grade:"ADJ",unit:"CS MDIEQ",region:"TANGER-TETOUAN-AL HOCEIMA"},
+  {name:"CHAIR BADR",grade:"INF",unit:"M'DIQ FNIDQ",region:"TANGER-TETOUAN-AL HOCEIMA"},
+  {name:"MAKKASS MOUAD",grade:"LT",unit:"TANGER",region:"TANGER-TETOUAN-AL HOCEIMA"},
+  {name:"BOUNDIR YASSINE",grade:"LT",unit:"UMRI ALHOCEIMA",region:"TANGER-TETOUAN-AL HOCEIMA"},
+  {name:"REDOUANE ELMAOUASY",grade:"ADJ",unit:"UMRI TANGER ASSILAH",region:"TANGER-TETOUAN-AL HOCEIMA"},
+  {name:"MOHAMMED OUADIE BEN FDILA",grade:"ADJ",unit:"UMRI TANGER ASSILAH",region:"TANGER-TETOUAN-AL HOCEIMA"},
+  {name:"ELBOUALI MOHAMED",grade:"LT",unit:"UMRI TANGER TETOUAN",region:"TANGER-TETOUAN-AL HOCEIMA"},
+  {name:"EL MAOUASY REDOUANE",grade:"ADJ",unit:"UMRI TANGER TETOUAN",region:"TANGER-TETOUAN-AL HOCEIMA"}
+];
+
+/* ─── STORAGE ───────────────────────────────────────────── */
+const LS_KEY = 'emt_formations_v1';
+function loadFormations() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveFormations(data) {
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+}
+function trainerKey(t) { return `${t.name}__${t.region}`; }
+
+/* ─── STATE ─────────────────────────────────────────────── */
+let activeRegion   = 'all';
+let activeFormation = null; // formation name filter
+let query          = '';
+let formations     = loadFormations(); // { "NAME__REGION": [{name, year, type}] }
+let modalTrainer   = null;
+
+/* ─── DOM ───────────────────────────────────────────────── */
+const $ = id => document.getElementById(id);
+
+/* ─── HELPERS ───────────────────────────────────────────── */
+function gradeKey(g) {
+  const u = g.toUpperCase();
+  if(u.startsWith('LT'))  return 'LT';
+  if(u.startsWith('CNE')) return 'CNE';
+  if(u.startsWith('CAP')) return 'CAP';
+  if(u.startsWith('ADJ')) return 'ADJ';
+  if(u.startsWith('CDT')) return 'CDT';
+  if(u.startsWith('SGT')) return 'SGT';
+  if(u.startsWith('MED')||u==='MEDECIN') return 'MED';
+  if(u.startsWith('INF')) return 'INF';
+  return 'OTHER';
+}
+function hl(str, q) {
+  if(!q) return str;
+  return str.replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'), '<mark>$1</mark>');
+}
+function group(list) {
+  const m = {};
+  list.forEach(t => {
+    const r = t.region||'NON-PRECISÉ';
+    const u = (!t.unit||t.unit.toLowerCase()==='non précisé') ? '— Non précisé' : t.unit;
+    if(!m[r]) m[r]={};
+    if(!m[r][u]) m[r][u]=[];
+    m[r][u].push(t);
+  });
+  return m;
+}
+
+/* ─── FORMATION HELPERS ─────────────────────────────────── */
+function getTrainerFormations(t) {
+  return formations[trainerKey(t)] || [];
+}
+function getAllFormationNames() {
+  const names = new Set();
+  Object.values(formations).forEach(list => list.forEach(f => names.add(f.name.toUpperCase())));
+  return [...names].sort();
+}
+function formationCountByName(name) {
+  let c = 0;
+  Object.values(formations).forEach(list => list.forEach(f => { if(f.name.toUpperCase()===name) c++; }));
+  return c;
+}
+
+/* ─── BUILD SIDEBAR NAV ─────────────────────────────────── */
+function buildRegionNav() {
+  const counts = {};
+  TRAINERS.forEach(t => { counts[t.region]=(counts[t.region]||0)+1; });
+  const nav = $('regionNav');
+  nav.innerHTML = '';
+  const mk = (label, val, count) => {
+    const b = document.createElement('button');
+    b.className = 'region-btn' + (activeRegion===val?' active':'');
+    b.dataset.val = val;
+    b.innerHTML = `<span class="region-btn-left"><span class="region-indicator"></span>${label}</span><span class="r-count">${count}</span>`;
+    b.addEventListener('click', () => { activeRegion=val; render(); });
+    nav.appendChild(b);
+  };
+  mk('Toutes régions','all',TRAINERS.length);
+  Object.keys(counts).sort().forEach(r => mk(r,r,counts[r]));
+}
+
+function buildFormationFilter() {
+  const list = $('formationFilterList');
+  const names = getAllFormationNames();
+  if(!names.length) {
+    list.innerHTML = '<div class="no-formations-msg">Aucune formation enregistrée</div>';
+    return;
+  }
+  list.innerHTML = '';
+  names.forEach(name => {
+    const count = formationCountByName(name);
+    const b = document.createElement('button');
+    b.className = 'form-filter-btn' + (activeFormation===name?' active':'');
+    b.dataset.name = name;
+    b.innerHTML = `<span class="form-filter-btn-left"><span class="form-indicator"></span>${name}</span><span class="f-count">${count}</span>`;
+    b.addEventListener('click', () => {
+      activeFormation = activeFormation===name ? null : name;
+      render();
+    });
+    list.appendChild(b);
+  });
+}
+
+/* ─── FILTER BANNER ─────────────────────────────────────── */
+function updateBanner() {
+  const banner = $('filterBanner');
+  if(activeFormation) {
+    banner.classList.add('visible');
+    $('bannerFormName').textContent = activeFormation;
+  } else {
+    banner.classList.remove('visible');
+  }
+}
+
+/* ─── MAIN RENDER ───────────────────────────────────────── */
+function render() {
+  const q = query.toLowerCase();
+
+  // Update nav active states
+  document.querySelectorAll('.region-btn').forEach(b => b.classList.toggle('active', b.dataset.val===activeRegion));
+  document.querySelectorAll('.form-filter-btn').forEach(b => b.classList.toggle('active', b.dataset.name===activeFormation));
+  updateBanner();
+
+  // Filter
+  const list = TRAINERS.filter(t => {
+    const mr = activeRegion==='all' || t.region===activeRegion;
+    const mq = !q || [t.name,t.grade,t.unit,t.region].join(' ').toLowerCase().includes(q);
+    let mf = true;
+    if(activeFormation) {
+      const tf = getTrainerFormations(t);
+      mf = tf.some(f => f.name.toUpperCase()===activeFormation);
+    }
+    return mr && mq && mf;
+  });
+
+  // Stats (always from full filtered list ignoring formation filter for counts)
+  const listForStats = TRAINERS.filter(t => {
+    const mr = activeRegion==='all' || t.region===activeRegion;
+    const mq = !q || [t.name,t.grade,t.unit,t.region].join(' ').toLowerCase().includes(q);
+    return mr && mq;
+  });
+  const grouped = group(list);
+  const regions = Object.keys(grouped).sort();
+  const units = new Set(listForStats.map(t=>t.unit));
+
+  $('totalStat').textContent   = list.length;
+  $('regionStat').textContent  = regions.length;
+  $('unitStat').textContent    = units.size;
+  $('resultCount').textContent = list.length;
+  $('activeCrumb').textContent = activeRegion==='all'?'TOUTES RÉGIONS':activeRegion;
+
+  const wrap = $('groupsWrap');
+  wrap.innerHTML = '';
+
+  if(!list.length) { $('emptyState').classList.remove('hidden'); return; }
+  $('emptyState').classList.add('hidden');
+
+  regions.forEach(region => {
+    const um = grouped[region];
+    const unames = Object.keys(um).sort();
+    const tot = unames.reduce((s,u)=>s+um[u].length, 0);
+
+    const sec = document.createElement('div');
+    sec.className = 'region-section';
+
+    let unitsHTML = unames.map(u => {
+      const trainersHTML = um[u].map(t => {
+        const tf = getTrainerFormations(t);
+        const formTagsHTML = tf.length
+          ? tf.map(f => `<span class="formation-tag">${f.name}${f.year?' · '+f.year:''}</span>`).join('')
+          : '';
+        const key = trainerKey(t);
+        return `
+          <div class="trainer-row" data-key="${key}">
+            <div class="trainer-row-top">
+              <div class="tr-left">
+                <div class="tr-name">${hl(t.name,q)}</div>
+              </div>
+              <span class="tr-grade g-${gradeKey(t.grade)}">${t.grade}</span>
+            </div>
+            ${formTagsHTML ? `<div class="trainer-formations">${formTagsHTML}</div>` : ''}
+            <button class="btn-add-formation" data-key="${key}">
+              <span class="plus">+</span> ${tf.length ? 'modifier formations' : 'ajouter formation'}
+            </button>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="unit-cell">
+          <div class="unit-top">
+            <div class="unit-name">${hl(u.replace(/^— /,''),q)}</div>
+            <div class="unit-count">${um[u].length}</div>
+          </div>
+          <div class="trainer-list">${trainersHTML}</div>
+        </div>
+      `;
+    }).join('');
+
+    sec.innerHTML = `
+      <div class="region-head">
+        <div class="region-accent-bar"></div>
+        <div class="region-head-inner">
+          <div class="region-head-title">${hl(region,q)}</div>
+          <div class="region-head-right">
+            <span class="rh-chip hi">${tot} formateur${tot>1?'s':''}</span>
+            <span class="rh-chip">${unames.length} unité${unames.length>1?'s':''}</span>
+          </div>
+        </div>
+      </div>
+      <div class="units-grid">${unitsHTML}</div>
+    `;
+    wrap.appendChild(sec);
+  });
+
+  // Bind "add formation" buttons
+  wrap.querySelectorAll('.btn-add-formation').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const key = btn.dataset.key;
+      const trainer = TRAINERS.find(t => trainerKey(t)===key);
+      if(trainer) openModal(trainer);
+    });
+  });
+}
+
+/* ─── MODAL ─────────────────────────────────────────────── */
+function openModal(trainer) {
+  modalTrainer = trainer;
+  $('modalGrade').textContent = trainer.grade + ' · ' + trainer.region;
+  $('modalName').textContent  = trainer.name;
+  $('modalMeta').textContent  = 'Unité : ' + trainer.unit;
+  $('formInput').value = '';
+  $('formYear').value  = '';
+  $('formType').value  = '';
+  renderModalList();
+  $('modalOverlay').classList.add('open');
+  setTimeout(() => $('formInput').focus(), 200);
+}
+
+function closeModal() {
+  $('modalOverlay').classList.remove('open');
+  modalTrainer = null;
+}
+
+function renderModalList() {
+  const list = $('modalFormationsList');
+  const tf = getTrainerFormations(modalTrainer);
+  if(!tf.length) {
+    list.innerHTML = '<div class="modal-no-formations">Aucune formation enregistrée pour cet officier.</div>';
+    return;
+  }
+  list.innerHTML = tf.map((f,i) => `
+    <div class="modal-formation-item">
+      <div>
+        <div class="modal-formation-name">${f.name}${f.type?' <span style="color:var(--olive-lt);font-size:0.65rem;">· '+f.type+'</span>':''}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        ${f.year ? `<span class="modal-formation-year">${f.year}</span>` : ''}
+        <button class="btn-remove-formation" data-idx="${i}" title="Supprimer">✕</button>
+      </div>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.btn-remove-formation').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx);
+      const key = trainerKey(modalTrainer);
+      formations[key] = formations[key].filter((_,i)=>i!==idx);
+      if(!formations[key].length) delete formations[key];
+      saveFormations(formations);
+      renderModalList();
+      buildFormationFilter();
+      render();
+    });
+  });
+}
+
+function addFormation() {
+  const name = $('formInput').value.trim();
+  if(!name) { $('formInput').focus(); $('formInput').style.borderColor='var(--red)'; setTimeout(()=>$('formInput').style.borderColor='',1200); return; }
+  const year = $('formYear').value.trim();
+  const type = $('formType').value;
+  const key  = trainerKey(modalTrainer);
+  if(!formations[key]) formations[key] = [];
+  formations[key].push({ name: name.toUpperCase(), year: year||null, type: type||null });
+  saveFormations(formations);
+  $('formInput').value = '';
+  $('formYear').value  = '';
+  $('formType').value  = '';
+  renderModalList();
+  buildFormationFilter();
+  render();
+}
+
+/* ─── EVENTS ─────────────────────────────────────────────── */
+$('searchInput').addEventListener('input', e => {
+  query = e.target.value.trim();
+  $('clearBtn').classList.toggle('hidden', !query);
+  render();
+});
+$('clearBtn').addEventListener('click', () => {
+  $('searchInput').value=''; query='';
+  $('clearBtn').classList.add('hidden');
+  $('searchInput').focus(); render();
+});
+$('modalClose').addEventListener('click', closeModal);
+$('modalOverlay').addEventListener('click', e => { if(e.target===$('modalOverlay')) closeModal(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+$('btnModalAdd').addEventListener('click', addFormation);
+$('formInput').addEventListener('keydown', e => { if(e.key==='Enter') addFormation(); });
+$('bannerClearBtn').addEventListener('click', () => { activeFormation=null; render(); buildFormationFilter(); });
+
+/* ─── INIT ─────────────────────────────────────────────── */
+buildRegionNav();
+buildFormationFilter();
+render();
+</script>
+</body>
+</html>
