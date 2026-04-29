@@ -3,520 +3,486 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>EMT — Commandement Formateurs</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <title>EMT — Commandement</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    :root {
-      --bg:         #0c0e0b;
-      --bg2:        #111410;
-      --bg3:        #161a14;
-      --panel:      #1a1e17;
-      --panel2:     #1f2419;
-      --border:     rgba(120,160,80,0.15);
-      --border2:    rgba(120,160,80,0.08);
-      --olive:      #6b8c42;
-      --olive-lt:   #8ab050;
-      --olive-glow: rgba(107,140,66,0.18);
-      --amber:      #d4920a;
-      --amber-soft: rgba(212,146,10,0.12);
-      --red:        #c0392b;
-      --red-soft:   rgba(192,57,43,0.12);
-      --cyan:       #3ab8c4;
-      --cyan-soft:  rgba(58,184,196,0.12);
-      --text:       #d8dfd0;
-      --text2:      #9aa68a;
-      --text3:      #5a6650;
-      --mono:       'IBM Plex Mono', monospace;
-      --display:    'Bebas Neue', sans-serif;
+    :root{
+      --bg:#0c0e0b;--bg2:#111410;--bg3:#161a14;
+      --panel:#1a1e17;--panel2:#1f2419;
+      --border:rgba(120,160,80,0.15);--border2:rgba(120,160,80,0.08);
+      --olive:#6b8c42;--olive-lt:#8ab050;--olive-glow:rgba(107,140,66,0.18);
+      --amber:#d4920a;--amber-soft:rgba(212,146,10,0.12);
+      --red:#c0392b;--red-soft:rgba(192,57,43,0.12);
+      --cyan:#3ab8c4;--cyan-soft:rgba(58,184,196,0.12);
+      --text:#d8dfd0;--text2:#9aa68a;--text3:#5a6650;
+      --mono:'IBM Plex Mono',monospace;--display:'Bebas Neue',sans-serif;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: var(--mono);
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-    body::before {
-      content: '';
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
-      background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
-    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:var(--mono);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px)}
 
-    /* ─── LAYOUT ────────────────────────────────────────── */
-    .layout {
-      position: relative; z-index: 1;
-      display: grid;
-      grid-template-columns: 300px 1fr;
-      min-height: 100vh;
-    }
+    /* ── LAYOUT ── */
+    .layout{position:relative;z-index:1;display:grid;grid-template-columns:280px 1fr;min-height:100vh}
 
-    /* ─── SIDEBAR ───────────────────────────────────────── */
-    .sidebar {
-      position: sticky; top: 0; height: 100vh; overflow-y: auto;
-      background: var(--bg2);
-      border-right: 1px solid var(--border);
-      display: flex; flex-direction: column;
-    }
-    .sidebar::-webkit-scrollbar { width: 3px; }
-    .sidebar::-webkit-scrollbar-thumb { background: var(--olive); }
+    /* ── SIDEBAR ── */
+    .sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column}
+    .sidebar::-webkit-scrollbar{width:3px}
+    .sidebar::-webkit-scrollbar-thumb{background:var(--olive)}
+    .sb-topband{padding:0 16px;height:42px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;background:var(--olive)}
+    .sb-topband-text{font-family:var(--display);font-size:0.82rem;letter-spacing:0.2em;color:#0c0e0b}
+    .live-dot{width:8px;height:8px;border-radius:50%;background:#0c0e0b;animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(12,14,11,0.6)}50%{box-shadow:0 0 0 5px rgba(12,14,11,0)}}
+    .sb-logo{padding:18px 18px 12px;border-bottom:1px solid var(--border)}
+    .sb-codename{font-size:0.58rem;letter-spacing:0.25em;color:var(--olive-lt);text-transform:uppercase;margin-bottom:6px}
+    .sb-title{font-family:var(--display);font-size:2rem;line-height:0.9;letter-spacing:0.04em;color:var(--text)}
+    .sb-title span{color:var(--olive-lt)}
+    .sb-sub{margin-top:7px;font-size:0.6rem;color:var(--text3);letter-spacing:0.08em}
+    .sb-stats{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border)}
+    .sb-stat{padding:10px 6px;text-align:center;border-right:1px solid var(--border2);position:relative}
+    .sb-stat:last-child{border-right:none}
+    .sb-stat::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--olive)}
+    .sb-stat strong{display:block;font-family:var(--display);font-size:1.7rem;letter-spacing:0.04em;color:var(--olive-lt);line-height:1}
+    .sb-stat span{font-size:0.56rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em}
 
-    .sb-topband {
-      padding: 0 20px; height: 44px; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: space-between;
-      background: var(--olive);
-    }
-    .sb-topband-text { font-family: var(--display); font-size: 0.85rem; letter-spacing: 0.2em; color: #0c0e0b; }
-    .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #0c0e0b; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(12,14,11,0.6)} 50%{box-shadow:0 0 0 5px rgba(12,14,11,0)} }
+    /* SIDEBAR SECTIONS */
+    .sb-sec{padding:10px 14px;border-bottom:1px solid var(--border)}
+    .sb-lbl{font-size:0.56rem;letter-spacing:0.2em;color:var(--olive);text-transform:uppercase;margin-bottom:7px}
+    .sb-lbl.cyan{color:var(--cyan)}
+    .sb-lbl.amber{color:var(--amber)}
+    .search-box{position:relative}
+    #searchInput{width:100%;padding:8px 28px 8px 10px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font:500 0.74rem var(--mono);letter-spacing:0.04em;outline:none;transition:border-color 0.2s}
+    #searchInput::placeholder{color:var(--text3)}
+    #searchInput:focus{border-color:var(--olive);box-shadow:0 0 0 2px var(--olive-glow)}
+    #clearBtn{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);font-size:1.1rem;cursor:pointer;padding:4px;transition:color 0.2s}
+    #clearBtn:hover{color:var(--amber)}
+    #clearBtn.hidden{display:none}
+    .sb-nav{padding:0 8px 8px;display:grid;gap:2px}
+    .nav-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:7px 9px;background:none;border:1px solid transparent;color:var(--text3);font:500 0.68rem var(--mono);letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;text-align:left;transition:all 0.15s;gap:6px}
+    .nav-btn:hover{color:var(--text);background:var(--panel);border-color:var(--border)}
+    .nav-btn.active{color:var(--olive-lt);background:var(--olive-glow);border-color:var(--olive)}
+    .nav-btn.active-cyan{color:var(--cyan);background:var(--cyan-soft);border-color:rgba(58,184,196,0.3)}
+    .nav-btn-left{display:flex;align-items:center;gap:6px}
+    .nav-dot{width:5px;height:5px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background 0.2s}
+    .nav-btn.active .nav-dot{background:var(--olive-lt)}
+    .nav-btn.active-cyan .nav-dot{background:var(--cyan)}
+    .nb-count{font-size:0.6rem;padding:2px 6px;background:var(--bg3);color:var(--text3);border:1px solid var(--border2);flex-shrink:0}
+    .nav-btn.active .nb-count{background:var(--olive);color:#0c0e0b;border-color:var(--olive)}
+    .nav-btn.active-cyan .nb-count{background:var(--cyan);color:#0c0e0b;border-color:var(--cyan)}
+    .no-items-msg{padding:6px 9px;font-size:0.62rem;color:var(--text3);font-style:italic}
 
-    .sb-logo { padding: 20px 20px 14px; border-bottom: 1px solid var(--border); }
-    .sb-codename { font-size: 0.6rem; letter-spacing: 0.25em; color: var(--olive-lt); text-transform: uppercase; margin-bottom: 8px; }
-    .sb-title { font-family: var(--display); font-size: 2.2rem; line-height: 0.9; letter-spacing: 0.04em; color: var(--text); }
-    .sb-title span { color: var(--olive-lt); }
-    .sb-sub { margin-top: 8px; font-size: 0.62rem; color: var(--text3); letter-spacing: 0.08em; }
+    /* PAGE TABS */
+    .page-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:10}
+    .tab-btn{flex:1;padding:0;height:44px;background:none;border:none;border-right:1px solid var(--border);color:var(--text3);font:500 0.68rem var(--mono);letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;border-bottom:2px solid transparent}
+    .tab-btn:last-child{border-right:none}
+    .tab-btn:hover{color:var(--text);background:var(--panel)}
+    .tab-btn.active{color:var(--olive-lt);border-bottom-color:var(--olive-lt)}
 
-    .sb-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; border-bottom: 1px solid var(--border); }
-    .sb-stat { padding: 12px 8px; text-align: center; border-right: 1px solid var(--border2); position: relative; }
-    .sb-stat:last-child { border-right: none; }
-    .sb-stat::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:var(--olive); }
-    .sb-stat strong { display: block; font-family: var(--display); font-size: 1.8rem; letter-spacing: 0.04em; color: var(--olive-lt); line-height: 1; }
-    .sb-stat span { font-size: 0.58rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; }
+    /* MAIN */
+    .main{display:flex;flex-direction:column;min-height:100vh}
+    .page{display:none;flex:1;flex-direction:column}
+    .page.active{display:flex}
 
-    /* SEARCH */
-    .sb-section { padding: 12px 16px; border-bottom: 1px solid var(--border); }
-    .sb-section-label { font-size: 0.58rem; letter-spacing: 0.2em; color: var(--olive); text-transform: uppercase; margin-bottom: 8px; }
-    .search-box { position: relative; }
-    #searchInput {
-      width: 100%; padding: 9px 30px 9px 10px;
-      background: var(--bg3); border: 1px solid var(--border);
-      color: var(--text); font: 500 0.76rem var(--mono); letter-spacing: 0.04em;
-      outline: none; transition: border-color 0.2s, background 0.2s;
-    }
-    #searchInput::placeholder { color: var(--text3); }
-    #searchInput:focus { border-color: var(--olive); background: var(--panel2); box-shadow: 0 0 0 2px var(--olive-glow); }
-    #clearBtn {
-      position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
-      background: none; border: none; color: var(--text3);
-      font-size: 1.1rem; cursor: pointer; padding: 4px; transition: color 0.2s;
-    }
-    #clearBtn:hover { color: var(--amber); }
-    #clearBtn.hidden { display: none; }
+    /* PAGE HEAD */
+    .page-head{padding:22px 28px 16px;border-bottom:1px solid var(--border2)}
+    .pg-eyebrow{display:flex;align-items:center;gap:10px;font-size:0.6rem;letter-spacing:0.2em;color:var(--olive);text-transform:uppercase;margin-bottom:8px}
+    .pg-eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--olive)}
+    .pg-title{font-family:var(--display);font-size:2.4rem;letter-spacing:0.06em;line-height:0.9;color:var(--text)}
+    .pg-title em{color:var(--olive-lt);font-style:normal}
+    .pg-meta{margin-top:8px;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+    .pg-tag{font-size:0.6rem;color:var(--text3);padding:3px 8px;border:1px solid var(--border2);background:var(--panel)}
+    .pg-tag b{color:var(--amber)}
+    .filter-banner{display:none;align-items:center;justify-content:space-between;padding:7px 28px;background:var(--cyan-soft);border-bottom:1px solid rgba(58,184,196,0.2);font-size:0.66rem;color:var(--cyan);letter-spacing:0.08em;gap:16px}
+    .filter-banner.visible{display:flex}
+    .btn-banner-clear{background:none;border:1px solid rgba(58,184,196,0.3);color:var(--cyan);font:500 0.63rem var(--mono);padding:3px 9px;cursor:pointer;letter-spacing:0.08em;transition:background 0.15s}
+    .btn-banner-clear:hover{background:rgba(58,184,196,0.15)}
+    .content{padding:20px 28px;flex:1}
+    .topbar-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .btn-action{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;font:500 0.66rem var(--mono);letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;border:1px solid;transition:all 0.2s}
+    .btn-green{color:var(--olive-lt);border-color:var(--olive);background:var(--olive-glow)}
+    .btn-green:hover{background:rgba(107,140,66,0.3)}
+    .btn-amber{color:var(--amber);border-color:rgba(212,146,10,0.4);background:var(--amber-soft)}
+    .btn-amber:hover{background:rgba(212,146,10,0.2)}
+    .btn-cyan{color:var(--cyan);border-color:rgba(58,184,196,0.3);background:var(--cyan-soft)}
+    .btn-cyan:hover{background:rgba(58,184,196,0.2)}
+    .btn-red{color:#e07070;border-color:rgba(192,57,43,0.3);background:var(--red-soft)}
+    .btn-red:hover{background:rgba(192,57,43,0.2)}
 
-    /* REGION NAV */
-    .sb-nav { padding: 0 8px 10px; display: grid; gap: 2px; }
-    .region-btn {
-      display: flex; align-items: center; justify-content: space-between;
-      width: 100%; padding: 8px 10px;
-      background: none; border: 1px solid transparent;
-      color: var(--text3); font: 500 0.7rem var(--mono);
-      letter-spacing: 0.06em; text-transform: uppercase;
-      cursor: pointer; text-align: left; transition: all 0.15s; gap: 8px;
-    }
-    .region-btn:hover { color: var(--text); background: var(--panel); border-color: var(--border); }
-    .region-btn.active { color: var(--olive-lt); background: var(--olive-glow); border-color: var(--olive); }
-    .region-btn-left { display: flex; align-items: center; gap: 7px; }
-    .region-indicator { width: 5px; height: 5px; border-radius: 50%; background: var(--text3); flex-shrink: 0; transition: background 0.2s; }
-    .region-btn.active .region-indicator { background: var(--olive-lt); }
-    .r-count { font-size: 0.62rem; padding: 2px 6px; background: var(--bg3); color: var(--text3); border: 1px solid var(--border2); flex-shrink: 0; }
-    .region-btn.active .r-count { background: var(--olive); color: #0c0e0b; border-color: var(--olive); }
+    /* ── DIRECTORY ── */
+    .region-section{margin-bottom:20px;border:1px solid var(--border);background:var(--panel);animation:fadeIn 0.3s ease both}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .region-head{display:flex;align-items:stretch;border-bottom:1px solid var(--border)}
+    .region-accent{width:4px;background:var(--olive);flex-shrink:0}
+    .region-head-inner{flex:1;padding:11px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .region-head-title{font-family:var(--display);font-size:1.3rem;letter-spacing:0.1em;color:var(--text)}
+    .rh-right{display:flex;gap:7px;align-items:center}
+    .rh-chip{font-size:0.58rem;letter-spacing:0.1em;padding:2px 8px;border:1px solid var(--border);color:var(--text3);text-transform:uppercase;background:var(--bg3)}
+    .rh-chip.hi{color:var(--olive-lt);border-color:var(--olive);background:var(--olive-glow)}
+    .units-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1px;background:var(--border2)}
+    .unit-cell{background:var(--bg2);padding:13px 15px}
+    .unit-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;padding-bottom:7px;border-bottom:1px solid var(--border2);gap:8px}
+    .unit-name{font-size:0.66rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2)}
+    .unit-count{font-family:var(--display);font-size:1rem;color:var(--amber)}
+    .trainer-list{display:grid;gap:4px}
+    .trainer-row{padding:6px 9px;background:var(--bg3);border:1px solid transparent;transition:border-color 0.15s,background 0.15s}
+    .trainer-row:hover{border-color:var(--border);background:var(--panel)}
+    .tr-top{display:flex;align-items:center;justify-content:space-between;gap:7px}
+    .tr-left{display:flex;align-items:center;gap:7px;flex:1;min-width:0}
+    .tr-name{font-size:0.71rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .tr-grade{font-family:var(--display);font-size:0.8rem;letter-spacing:0.08em;padding:2px 6px;flex-shrink:0}
+    .g-LT{color:#7eb8d4;border:1px solid rgba(126,184,212,0.3);background:rgba(126,184,212,0.08)}
+    .g-CNE{color:#7dd4a0;border:1px solid rgba(125,212,160,0.3);background:rgba(125,212,160,0.08)}
+    .g-CAP{color:#d4b07d;border:1px solid rgba(212,176,125,0.3);background:rgba(212,176,125,0.08)}
+    .g-ADJ{color:var(--olive-lt);border:1px solid rgba(138,176,80,0.3);background:var(--olive-glow)}
+    .g-CDT{color:#c4a8e0;border:1px solid rgba(196,168,224,0.3);background:rgba(196,168,224,0.08)}
+    .g-SGT{color:#e09898;border:1px solid rgba(224,152,152,0.3);background:rgba(224,152,152,0.08)}
+    .g-MED{color:#f0d080;border:1px solid rgba(240,208,128,0.3);background:rgba(240,208,128,0.08)}
+    .g-INF{color:#80d4d4;border:1px solid rgba(128,212,212,0.3);background:rgba(128,212,212,0.08)}
+    .g-OTHER{color:var(--text3);border:1px solid var(--border);background:var(--bg3)}
+    .trainer-formations{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
+    .f-tag{font-size:0.58rem;padding:2px 6px;background:var(--cyan-soft);color:var(--cyan);border:1px solid rgba(58,184,196,0.25);text-transform:uppercase;white-space:nowrap}
+    .btn-edit-trainer{display:inline-flex;align-items:center;gap:4px;margin-top:5px;font:400 0.6rem var(--mono);letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);background:none;border:1px dashed rgba(255,255,255,0.1);padding:2px 7px;cursor:pointer;transition:color 0.2s,border-color 0.2s}
+    .btn-edit-trainer:hover{color:var(--olive-lt);border-color:var(--olive)}
+    mark{background:rgba(212,146,10,0.25);color:var(--amber);border-radius:1px;padding:0 1px}
+    .empty-state{padding:60px 28px;text-align:center;color:var(--text3);font-size:0.82rem;letter-spacing:0.1em}
+    .empty-state .ei{font-family:var(--display);font-size:3.5rem;color:var(--border);display:block;margin-bottom:10px}
+    .empty-state.hidden{display:none}
 
-    /* FORMATION FILTER */
-    .formation-filter-list { padding: 0 8px 10px; display: grid; gap: 2px; }
-    .form-filter-btn {
-      display: flex; align-items: center; justify-content: space-between;
-      width: 100%; padding: 7px 10px;
-      background: none; border: 1px solid transparent;
-      color: var(--text3); font: 400 0.68rem var(--mono);
-      letter-spacing: 0.04em; text-transform: uppercase;
-      cursor: pointer; text-align: left; transition: all 0.15s; gap: 8px;
-    }
-    .form-filter-btn:hover { color: var(--text); background: var(--panel); border-color: var(--border); }
-    .form-filter-btn.active { color: var(--cyan); background: var(--cyan-soft); border-color: rgba(58,184,196,0.3); }
-    .form-filter-btn-left { display: flex; align-items: center; gap: 7px; }
-    .form-indicator { width: 5px; height: 5px; border-radius: 50%; background: var(--text3); flex-shrink: 0; transition: background 0.2s; }
-    .form-filter-btn.active .form-indicator { background: var(--cyan); }
-    .f-count { font-size: 0.6rem; padding: 2px 6px; background: var(--bg3); color: var(--text3); border: 1px solid var(--border2); flex-shrink: 0; }
-    .form-filter-btn.active .f-count { background: var(--cyan); color: #0c0e0b; border-color: var(--cyan); }
-    .no-formations-msg { padding: 8px 10px; font-size: 0.65rem; color: var(--text3); font-style: italic; }
+    /* ── DASHBOARD ── */
+    .dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+    .dash-card{background:var(--panel);border:1px solid var(--border);padding:16px 18px;position:relative;overflow:hidden}
+    .dash-card::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px}
+    .dash-card.c-olive::before{background:var(--olive)}
+    .dash-card.c-amber::before{background:var(--amber)}
+    .dash-card.c-cyan::before{background:var(--cyan)}
+    .dash-card.c-red::before{background:var(--red)}
+    .dash-card-label{font-size:0.58rem;letter-spacing:0.18em;color:var(--text3);text-transform:uppercase;margin-bottom:8px}
+    .dash-card-value{font-family:var(--display);font-size:2.6rem;letter-spacing:0.04em;line-height:1}
+    .dash-card.c-olive .dash-card-value{color:var(--olive-lt)}
+    .dash-card.c-amber .dash-card-value{color:var(--amber)}
+    .dash-card.c-cyan .dash-card-value{color:var(--cyan)}
+    .dash-card.c-red .dash-card-value{color:#e07070}
+    .dash-card-sub{font-size:0.62rem;color:var(--text3);margin-top:4px}
+    .dash-section-title{font-family:var(--display);font-size:1.1rem;letter-spacing:0.1em;color:var(--text2);margin-bottom:12px;margin-top:22px;border-left:3px solid var(--olive);padding-left:10px}
+    .bar-chart{display:grid;gap:8px}
+    .bar-row{display:grid;grid-template-columns:160px 1fr auto;align-items:center;gap:12px}
+    .bar-label{font-size:0.66rem;color:var(--text2);letter-spacing:0.05em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .bar-track{background:var(--bg3);border:1px solid var(--border2);height:8px;border-radius:1px;overflow:hidden}
+    .bar-fill{height:100%;background:var(--olive);border-radius:1px;transition:width 0.5s ease}
+    .bar-val{font-size:0.66rem;color:var(--olive-lt);font-weight:600;min-width:24px;text-align:right}
+    .grade-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+    .grade-card{background:var(--bg3);border:1px solid var(--border);padding:12px 14px;text-align:center}
+    .grade-card-name{font-family:var(--display);font-size:1.1rem;letter-spacing:0.08em;margin-bottom:4px}
+    .grade-card-count{font-family:var(--display);font-size:2rem;color:var(--amber)}
+    .formation-dash-list{display:grid;gap:6px}
+    .fdash-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);gap:12px}
+    .fdash-name{font-size:0.72rem;color:var(--text);text-transform:uppercase;letter-spacing:0.04em}
+    .fdash-count{font-family:var(--display);font-size:1.1rem;color:var(--cyan)}
 
-    .sb-footer { margin-top: auto; padding: 12px 16px; border-top: 1px solid var(--border); font-size: 0.58rem; color: var(--text3); letter-spacing: 0.08em; flex-shrink: 0; }
-    .sb-footer span { color: var(--olive); }
+    /* ── SESSIONS ── */
+    .sessions-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+    .session-card{background:var(--panel);border:1px solid var(--border);overflow:hidden}
+    .session-card-head{padding:14px 16px;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:start;justify-content:space-between;gap:12px}
+    .session-card-name{font-family:var(--display);font-size:1.2rem;letter-spacing:0.06em;color:var(--text)}
+    .session-card-date{font-size:0.62rem;color:var(--amber);margin-top:4px}
+    .session-card-body{padding:14px 16px}
+    .session-meta{font-size:0.66rem;color:var(--text3);margin-bottom:4px}
+    .session-meta span{color:var(--text2)}
+    .session-actions{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+    .session-badge{display:inline-block;font-size:0.6rem;padding:3px 8px;border:1px solid rgba(138,176,80,0.3);color:var(--olive-lt);background:var(--olive-glow);letter-spacing:0.08em;text-transform:uppercase}
 
-    /* ─── MAIN ──────────────────────────────────────────── */
-    .main { display: flex; flex-direction: column; min-height: 100vh; }
-    .topbar {
-      position: sticky; top: 0; z-index: 10;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 32px; height: 44px;
-      background: var(--bg2); border-bottom: 1px solid var(--border); gap: 20px;
-    }
-    .breadcrumb { font-size: 0.65rem; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; }
-    .breadcrumb span { color: var(--olive-lt); }
-    .topbar-status { display: flex; align-items: center; gap: 8px; font-size: 0.65rem; color: var(--text3); letter-spacing: 0.08em; }
-    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--olive-lt); animation: blink 3s infinite; }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-    #resultCount { color: var(--olive-lt); font-weight: 600; }
+    /* ── MODALS ── */
+    .modal-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.78);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.2s}
+    .modal-overlay.open{opacity:1;pointer-events:all}
+    .modal{background:var(--bg2);border:1px solid var(--border);width:100%;max-width:500px;max-height:90vh;overflow-y:auto;transform:translateY(16px);transition:transform 0.2s;box-shadow:0 24px 60px rgba(0,0,0,0.5)}
+    .modal-overlay.open .modal{transform:translateY(0)}
+    .modal.wide{max-width:560px}
+    .modal-hdr{display:flex;align-items:start;justify-content:space-between;padding:16px 18px 12px;border-bottom:1px solid var(--border);gap:12px}
+    .modal-hdr-info{}
+    .modal-hdr-kicker{font-size:0.58rem;letter-spacing:0.2em;color:var(--olive);text-transform:uppercase;margin-bottom:5px}
+    .modal-hdr-title{font-family:var(--display);font-size:1.4rem;letter-spacing:0.06em;color:var(--text)}
+    .modal-hdr-sub{font-size:0.63rem;color:var(--text3);margin-top:3px}
+    .modal-close{background:none;border:1px solid var(--border);color:var(--text3);font-size:1rem;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:color 0.2s,border-color 0.2s}
+    .modal-close:hover{color:var(--text);border-color:var(--text3)}
+    .modal-body{padding:16px 18px}
+    .modal-sec-title{font-size:0.58rem;letter-spacing:0.2em;color:var(--olive);text-transform:uppercase;margin-bottom:8px}
+    .modal-sec-title.cyan{color:var(--cyan)}
+    .modal-sec-title.amber{color:var(--amber)}
+    .form-row{margin-bottom:10px}
+    .form-label{font-size:0.6rem;letter-spacing:0.15em;color:var(--text3);text-transform:uppercase;display:block;margin-bottom:5px}
+    .form-input,.form-select,.form-textarea{width:100%;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font:500 0.74rem var(--mono);outline:none;transition:border-color 0.2s}
+    .form-input::placeholder,.form-textarea::placeholder{color:var(--text3)}
+    .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--olive);box-shadow:0 0 0 2px var(--olive-glow)}
+    .form-select{cursor:pointer}
+    .form-select option{background:var(--bg2)}
+    .form-textarea{resize:vertical;min-height:70px}
+    .form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .btn-submit{width:100%;padding:10px;background:var(--olive-glow);border:1px solid var(--olive);color:var(--olive-lt);font:600 0.7rem var(--mono);letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;margin-top:12px}
+    .btn-submit:hover{background:rgba(107,140,66,0.3)}
+    .modal-list{display:grid;gap:5px;margin-bottom:12px}
+    .modal-list-item{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;background:var(--bg3);border:1px solid var(--border);gap:10px}
+    .modal-list-item-main{flex:1;min-width:0}
+    .modal-list-item-name{font-size:0.73rem;color:var(--text)}
+    .modal-list-item-sub{font-size:0.62rem;color:var(--amber);margin-top:2px}
+    .btn-remove{background:none;border:none;color:var(--text3);font-size:0.85rem;cursor:pointer;padding:2px 6px;transition:color 0.2s;flex-shrink:0}
+    .btn-remove:hover{color:var(--red)}
+    .divider{height:1px;background:var(--border);margin:14px 0}
+    .confirm-msg{font-size:0.8rem;color:var(--text);margin-bottom:14px}
+    .btn-row{display:flex;gap:8px}
+    .btn-row .btn-action{flex:1;justify-content:center}
 
-    .page-head { padding: 28px 32px 20px; border-bottom: 1px solid var(--border2); }
-    .pg-eyebrow { display: flex; align-items: center; gap: 10px; font-size: 0.62rem; letter-spacing: 0.2em; color: var(--olive); text-transform: uppercase; margin-bottom: 10px; }
-    .pg-eyebrow::before { content:''; display:block; width:24px; height:1px; background:var(--olive); }
-    .pg-title { font-family: var(--display); font-size: 2.8rem; letter-spacing: 0.06em; line-height: 0.9; color: var(--text); }
-    .pg-title em { color: var(--olive-lt); font-style: normal; }
-    .pg-meta { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
-    .pg-tag { font-size: 0.62rem; color: var(--text3); padding: 3px 9px; border: 1px solid var(--border2); background: var(--panel); }
-    .pg-tag b { color: var(--amber); }
+    .sb-footer{margin-top:auto;padding:11px 14px;border-top:1px solid var(--border);font-size:0.57rem;color:var(--text3);letter-spacing:0.08em;flex-shrink:0}
+    .sb-footer span{color:var(--olive)}
 
-    /* ACTIVE FILTER BANNER */
-    .filter-banner {
-      display: none;
-      align-items: center; justify-content: space-between;
-      padding: 8px 32px;
-      background: var(--cyan-soft);
-      border-bottom: 1px solid rgba(58,184,196,0.2);
-      font-size: 0.68rem; color: var(--cyan); letter-spacing: 0.08em;
-      gap: 16px;
-    }
-    .filter-banner.visible { display: flex; }
-    .filter-banner-clear {
-      background: none; border: 1px solid rgba(58,184,196,0.3); color: var(--cyan);
-      font: 500 0.65rem var(--mono); padding: 3px 10px; cursor: pointer;
-      letter-spacing: 0.08em; transition: background 0.15s;
-    }
-    .filter-banner-clear:hover { background: rgba(58,184,196,0.15); }
-
-    .content { padding: 24px 32px; flex: 1; }
-
-    /* ─── REGION BLOCK ──────────────────────────────────── */
-    .region-section { margin-bottom: 22px; border: 1px solid var(--border); background: var(--panel); animation: fadeIn 0.3s ease both; }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-    .region-head { display: flex; align-items: stretch; border-bottom: 1px solid var(--border); }
-    .region-accent-bar { width: 4px; background: var(--olive); flex-shrink: 0; }
-    .region-head-inner { flex: 1; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-    .region-head-title { font-family: var(--display); font-size: 1.4rem; letter-spacing: 0.1em; color: var(--text); }
-    .region-head-right { display: flex; gap: 8px; align-items: center; }
-    .rh-chip { font-size: 0.6rem; letter-spacing: 0.1em; padding: 3px 9px; border: 1px solid var(--border); color: var(--text3); text-transform: uppercase; background: var(--bg3); }
-    .rh-chip.hi { color: var(--olive-lt); border-color: var(--olive); background: var(--olive-glow); }
-
-    .units-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 1px; background: var(--border2); }
-    .unit-cell { background: var(--bg2); padding: 14px 16px; }
-    .unit-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border2); gap: 8px; }
-    .unit-name { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text2); }
-    .unit-count { font-family: var(--display); font-size: 1.1rem; letter-spacing: 0.06em; color: var(--amber); }
-
-    /* TRAINER ROW */
-    .trainer-list { display: grid; gap: 5px; }
-    .trainer-row {
-      padding: 7px 10px 7px 10px;
-      background: var(--bg3); border: 1px solid transparent;
-      cursor: default; transition: border-color 0.15s, background 0.15s;
-    }
-    .trainer-row:hover { border-color: var(--border); background: var(--panel); }
-    .trainer-row-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .tr-left { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
-    .tr-name { font-size: 0.73rem; font-weight: 500; color: var(--text); letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .tr-grade { font-family: var(--display); font-size: 0.82rem; letter-spacing: 0.08em; padding: 2px 7px; flex-shrink: 0; }
-    .g-LT    { color:#7eb8d4; border:1px solid rgba(126,184,212,0.3); background:rgba(126,184,212,0.08); }
-    .g-CNE   { color:#7dd4a0; border:1px solid rgba(125,212,160,0.3); background:rgba(125,212,160,0.08); }
-    .g-CAP   { color:#d4b07d; border:1px solid rgba(212,176,125,0.3); background:rgba(212,176,125,0.08); }
-    .g-ADJ   { color:var(--olive-lt); border:1px solid rgba(138,176,80,0.3); background:var(--olive-glow); }
-    .g-CDT   { color:#c4a8e0; border:1px solid rgba(196,168,224,0.3); background:rgba(196,168,224,0.08); }
-    .g-SGT   { color:#e09898; border:1px solid rgba(224,152,152,0.3); background:rgba(224,152,152,0.08); }
-    .g-MED   { color:#f0d080; border:1px solid rgba(240,208,128,0.3); background:rgba(240,208,128,0.08); }
-    .g-INF   { color:#80d4d4; border:1px solid rgba(128,212,212,0.3); background:rgba(128,212,212,0.08); }
-    .g-OTHER { color:var(--text3); border:1px solid var(--border); background:var(--bg3); }
-
-    /* FORMATIONS TAGS on trainer */
-    .trainer-formations { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
-    .formation-tag {
-      font-size: 0.6rem; padding: 2px 7px; letter-spacing: 0.06em;
-      background: var(--cyan-soft); color: var(--cyan);
-      border: 1px solid rgba(58,184,196,0.25);
-      text-transform: uppercase; white-space: nowrap;
-    }
-
-    /* ADD FORMATION BUTTON */
-    .btn-add-formation {
-      display: inline-flex; align-items: center; gap: 5px;
-      margin-top: 6px;
-      font: 400 0.62rem var(--mono); letter-spacing: 0.1em; text-transform: uppercase;
-      color: var(--text3); background: none;
-      border: 1px dashed rgba(255,255,255,0.1);
-      padding: 3px 8px; cursor: pointer;
-      transition: color 0.2s, border-color 0.2s;
-    }
-    .btn-add-formation:hover { color: var(--olive-lt); border-color: var(--olive); }
-    .btn-add-formation .plus { font-size: 0.9rem; line-height: 1; }
-
-    mark { background: rgba(212,146,10,0.25); color: var(--amber); border-radius: 1px; padding: 0 1px; }
-
-    .empty-state { padding: 80px 32px; text-align: center; color: var(--text3); font-size: 0.85rem; letter-spacing: 0.1em; }
-    .empty-state .ei { font-family: var(--display); font-size: 4rem; color: var(--border); display: block; margin-bottom: 12px; }
-    .empty-state.hidden { display: none; }
-
-    /* ─── MODAL ─────────────────────────────────────────── */
-    .modal-overlay {
-      position: fixed; inset: 0; z-index: 100;
-      background: rgba(0,0,0,0.75);
-      backdrop-filter: blur(4px);
-      display: flex; align-items: center; justify-content: center;
-      padding: 20px;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.2s;
-    }
-    .modal-overlay.open { opacity: 1; pointer-events: all; }
-
-    .modal {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      width: 100%; max-width: 520px;
-      max-height: 90vh; overflow-y: auto;
-      transform: translateY(16px);
-      transition: transform 0.2s;
-      box-shadow: 0 24px 60px rgba(0,0,0,0.5);
-    }
-    .modal-overlay.open .modal { transform: translateY(0); }
-
-    .modal-header {
-      display: flex; align-items: start; justify-content: space-between;
-      padding: 18px 20px 14px;
-      border-bottom: 1px solid var(--border);
-      gap: 12px;
-    }
-    .modal-header-info {}
-    .modal-officer-grade {
-      font-size: 0.6rem; letter-spacing: 0.2em; color: var(--olive); text-transform: uppercase; margin-bottom: 6px;
-    }
-    .modal-officer-name {
-      font-family: var(--display); font-size: 1.5rem; letter-spacing: 0.06em; color: var(--text);
-    }
-    .modal-officer-meta { font-size: 0.65rem; color: var(--text3); margin-top: 4px; }
-    .modal-close {
-      background: none; border: 1px solid var(--border); color: var(--text3);
-      font-size: 1.1rem; width: 32px; height: 32px;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; flex-shrink: 0; transition: color 0.2s, border-color 0.2s;
-    }
-    .modal-close:hover { color: var(--text); border-color: var(--text3); }
-
-    .modal-body { padding: 18px 20px; }
-
-    .modal-section-title {
-      font-size: 0.6rem; letter-spacing: 0.2em; color: var(--olive); text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-
-    /* EXISTING FORMATIONS LIST IN MODAL */
-    .modal-formations-list { display: grid; gap: 6px; margin-bottom: 16px; min-height: 20px; }
-    .modal-formation-item {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 8px 12px;
-      background: var(--bg3); border: 1px solid var(--border);
-      gap: 10px;
-    }
-    .modal-formation-name { font-size: 0.75rem; color: var(--text); letter-spacing: 0.04em; }
-    .modal-formation-year { font-size: 0.65rem; color: var(--amber); }
-    .btn-remove-formation {
-      background: none; border: none; color: var(--text3);
-      font-size: 0.8rem; cursor: pointer; padding: 2px 6px;
-      transition: color 0.2s;
-    }
-    .btn-remove-formation:hover { color: var(--red); }
-    .modal-no-formations { font-size: 0.72rem; color: var(--text3); font-style: italic; padding: 8px 0; }
-
-    /* ADD FORM IN MODAL */
-    .modal-add-form {
-      border: 1px solid var(--border);
-      background: var(--panel);
-      padding: 14px;
-    }
-    .modal-add-title {
-      font-size: 0.6rem; letter-spacing: 0.2em; color: var(--amber); text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-    .modal-fields { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-bottom: 10px; }
-    .modal-fields-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-    .modal-input, .modal-select {
-      padding: 9px 10px;
-      background: var(--bg3); border: 1px solid var(--border);
-      color: var(--text); font: 500 0.75rem var(--mono);
-      outline: none; width: 100%;
-      transition: border-color 0.2s;
-    }
-    .modal-input::placeholder { color: var(--text3); }
-    .modal-input:focus, .modal-select:focus { border-color: var(--olive); box-shadow: 0 0 0 2px var(--olive-glow); }
-    .modal-select { cursor: pointer; }
-    .modal-select option { background: var(--bg2); }
-
-    .btn-modal-add {
-      width: 100%;
-      padding: 10px;
-      background: var(--olive-glow);
-      border: 1px solid var(--olive);
-      color: var(--olive-lt);
-      font: 600 0.72rem var(--mono);
-      letter-spacing: 0.15em; text-transform: uppercase;
-      cursor: pointer; transition: background 0.2s;
-    }
-    .btn-modal-add:hover { background: rgba(107,140,66,0.3); }
-
-    /* STAGGER */
-    .region-section:nth-child(1){animation-delay:0ms}
-    .region-section:nth-child(2){animation-delay:50ms}
-    .region-section:nth-child(3){animation-delay:100ms}
-    .region-section:nth-child(4){animation-delay:150ms}
-    .region-section:nth-child(5){animation-delay:200ms}
-    .region-section:nth-child(6){animation-delay:250ms}
-    .region-section:nth-child(7){animation-delay:300ms}
-    .region-section:nth-child(8){animation-delay:350ms}
-
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-thumb { background: var(--border); }
-
+    ::-webkit-scrollbar{width:4px}
+    ::-webkit-scrollbar-thumb{background:var(--border)}
     @media(max-width:900px){
-      .layout{grid-template-columns:1fr;}
-      .sidebar{position:relative;height:auto;}
-      .pg-title{font-size:2rem;}
-      .content,.topbar{padding-left:16px;padding-right:16px;}
-      .page-head,.filter-banner{padding-left:16px;padding-right:16px;}
+      .layout{grid-template-columns:1fr}
+      .sidebar{position:relative;height:auto}
+      .dash-grid{grid-template-columns:1fr 1fr}
+      .content,.page-head,.filter-banner{padding-left:16px;padding-right:16px}
     }
     @media(max-width:600px){
-      .region-head-right{display:none;}
-      .units-grid{grid-template-columns:1fr;}
+      .dash-grid{grid-template-columns:1fr}
+      .units-grid{grid-template-columns:1fr}
+      .region-head-right{display:none}
     }
   </style>
 </head>
 <body>
 <div class="layout">
 
-  <!-- ═══ SIDEBAR ═══ -->
-  <aside class="sidebar">
-    <div class="sb-topband">
-      <span class="sb-topband-text">SYSTÈME OPÉRATIONNEL</span>
-      <div class="live-dot"></div>
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="sb-topband">
+    <span class="sb-topband-text">SYSTÈME OPÉRATIONNEL</span>
+    <div class="live-dot"></div>
+  </div>
+  <div class="sb-logo">
+    <p class="sb-codename">Protection Civile · Maroc</p>
+    <h1 class="sb-title">EMT<br><span>FORMATEURS</span></h1>
+    <p class="sb-sub" id="sbSession">SESSION MOIS 4 · NATIONAL</p>
+  </div>
+  <div class="sb-stats">
+    <div class="sb-stat"><strong id="totalStat">0</strong><span>effectif</span></div>
+    <div class="sb-stat"><strong id="regionStat">0</strong><span>régions</span></div>
+    <div class="sb-stat"><strong id="unitStat">0</strong><span>unités</span></div>
+  </div>
+  <div class="sb-sec">
+    <div class="sb-lbl">▸ Recherche</div>
+    <div class="search-box">
+      <input id="searchInput" type="search" placeholder="Nom · Grade · Unité…" autocomplete="off"/>
+      <button id="clearBtn" class="hidden">×</button>
     </div>
+  </div>
+  <div class="sb-sec" style="padding-bottom:2px">
+    <div class="sb-lbl">▸ Régions</div>
+  </div>
+  <nav class="sb-nav" id="regionNav"></nav>
+  <div class="sb-sec" style="padding-bottom:2px;border-top:1px solid var(--border)">
+    <div class="sb-lbl cyan">▸ Filtre · Formations</div>
+  </div>
+  <div class="sb-nav" id="formationFilterNav">
+    <div class="no-items-msg">Aucune formation enregistrée</div>
+  </div>
+  <div class="sb-footer">
+    EMT · 3 SEMAINES · 120H · <span>40% TH / 60% PR</span>
+  </div>
+</aside>
 
-    <div class="sb-logo">
-      <p class="sb-codename">Protection Civile · Maroc</p>
-      <h1 class="sb-title">EMT<br><span>FORMATEURS</span></h1>
-      <p class="sb-sub">SESSION MOIS 4 · ANNUAIRE NATIONAL</p>
-    </div>
+<!-- ═══ MAIN ═══ -->
+<div class="main">
 
-    <div class="sb-stats">
-      <div class="sb-stat"><strong id="totalStat">0</strong><span>effectif</span></div>
-      <div class="sb-stat"><strong id="regionStat">0</strong><span>régions</span></div>
-      <div class="sb-stat"><strong id="unitStat">0</strong><span>unités</span></div>
-    </div>
+  <!-- TABS -->
+  <div class="page-tabs">
+    <button class="tab-btn active" data-tab="directory">📋 Annuaire</button>
+    <button class="tab-btn" data-tab="dashboard">📊 Dashboard</button>
+    <button class="tab-btn" data-tab="sessions">📅 Sessions</button>
+  </div>
 
-    <!-- SEARCH -->
-    <div class="sb-section">
-      <div class="sb-section-label">▸ Recherche</div>
-      <div class="search-box">
-        <input id="searchInput" type="search" placeholder="Nom · Grade · Unité…" autocomplete="off"/>
-        <button id="clearBtn" class="hidden">×</button>
-      </div>
-    </div>
-
-    <!-- REGION NAV -->
-    <div class="sb-section" style="padding-bottom:4px;">
-      <div class="sb-section-label">▸ Régions</div>
-    </div>
-    <nav class="sb-nav" id="regionNav"></nav>
-
-    <!-- FORMATION FILTER -->
-    <div class="sb-section" style="padding-bottom:4px; border-top:1px solid var(--border);">
-      <div class="sb-section-label" style="color:var(--cyan);">▸ Filtre · Formations</div>
-    </div>
-    <div class="formation-filter-list" id="formationFilterList">
-      <div class="no-formations-msg">Aucune formation enregistrée</div>
-    </div>
-
-    <div class="sb-footer">
-      PROG. EMT · 3 SEMAINES · 120H · <span>40% THÉORIE / 60% PRATIQUE</span>
-    </div>
-  </aside>
-
-  <!-- ═══ MAIN ═══ -->
-  <div class="main">
-    <div class="topbar">
-      <span class="breadcrumb">EMT · <span id="activeCrumb">TOUTES RÉGIONS</span></span>
-      <div class="topbar-status">
-        <div class="status-dot"></div>
-        <span id="resultCount">0</span>&nbsp;formateur(s)
-      </div>
-    </div>
-
-    <!-- ACTIVE FORMATION FILTER BANNER -->
+  <!-- ── PAGE: DIRECTORY ── -->
+  <div class="page active" id="page-directory">
     <div class="filter-banner" id="filterBanner">
-      <span>▸ FILTRE FORMATION ACTIF : <strong id="bannerFormName"></strong></span>
-      <button class="filter-banner-clear" id="bannerClearBtn">EFFACER FILTRE</button>
+      <span>▸ FORMATION : <strong id="bannerFormName"></strong></span>
+      <button class="btn-banner-clear" id="bannerClearBtn">EFFACER</button>
     </div>
-
     <div class="page-head">
-      <div class="pg-eyebrow">Annuaire National — Session Mois 4</div>
-      <h2 class="pg-title">ÉQUIPE <em>EMT</em><br>PAR RÉGION</h2>
+      <div class="pg-eyebrow">Annuaire National</div>
+      <h2 class="pg-title">ÉQUIPE <em>EMT</em></h2>
       <div class="pg-meta">
-        <span class="pg-tag">Durée <b>3 semaines</b></span>
-        <span class="pg-tag">Volume <b>120 heures</b></span>
-        <span class="pg-tag">Horaire <b>09h – 17h</b></span>
-        <span class="pg-tag">Sites <b>ENPC · CPPC Fès</b></span>
+        <div class="topbar-actions">
+          <button class="btn-action btn-green" id="btnAddTrainer">+ Nouveau formateur</button>
+          <button class="btn-action btn-amber" id="btnExportExcel">↓ Excel</button>
+          <button class="btn-action btn-cyan" id="btnExportPDF">↓ PDF</button>
+        </div>
       </div>
     </div>
-
     <div class="content">
       <div id="groupsWrap"></div>
       <div id="emptyState" class="empty-state hidden">
-        <span class="ei">[ 0 ]</span>AUCUN RÉSULTAT TROUVÉ
+        <span class="ei">[ 0 ]</span>AUCUN RÉSULTAT
       </div>
     </div>
   </div>
 
+  <!-- ── PAGE: DASHBOARD ── -->
+  <div class="page" id="page-dashboard">
+    <div class="page-head">
+      <div class="pg-eyebrow">Statistiques opérationnelles</div>
+      <h2 class="pg-title">DASH<em>BOARD</em></h2>
+    </div>
+    <div class="content" id="dashContent"></div>
+  </div>
+
+  <!-- ── PAGE: SESSIONS ── -->
+  <div class="page" id="page-sessions">
+    <div class="page-head">
+      <div class="pg-eyebrow">Gestion des programmes</div>
+      <h2 class="pg-title">SES<em>SIONS</em></h2>
+      <div class="pg-meta">
+        <button class="btn-action btn-green" id="btnAddSession">+ Nouvelle session</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="sessions-grid" id="sessionsGrid"></div>
+      <div id="sessionsEmpty" class="empty-state hidden">
+        <span class="ei">[ 0 ]</span>AUCUNE SESSION
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
 </div><!-- /layout -->
 
-<!-- ═══ MODAL ═══ -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal" id="modal">
-    <div class="modal-header">
-      <div class="modal-header-info">
-        <div class="modal-officer-grade" id="modalGrade"></div>
-        <div class="modal-officer-name" id="modalName"></div>
-        <div class="modal-officer-meta" id="modalMeta"></div>
+<!-- ═══ MODAL: TRAINER EDIT ═══ -->
+<div class="modal-overlay" id="modalTrainer">
+  <div class="modal wide">
+    <div class="modal-hdr">
+      <div class="modal-hdr-info">
+        <div class="modal-hdr-kicker" id="mtkicker">FORMATEUR</div>
+        <div class="modal-hdr-title" id="mtTitle">—</div>
+        <div class="modal-hdr-sub" id="mtSub"></div>
       </div>
-      <button class="modal-close" id="modalClose">✕</button>
+      <button class="modal-close" data-close="modalTrainer">✕</button>
     </div>
     <div class="modal-body">
-      <div class="modal-section-title">▸ Formations effectuées</div>
-      <div class="modal-formations-list" id="modalFormationsList"></div>
-
-      <div class="modal-add-form">
-        <div class="modal-add-title">+ Ajouter une formation</div>
-        <div class="modal-fields">
-          <input class="modal-input" id="formInput" placeholder="Nom de la formation…" autocomplete="off"/>
-        </div>
-        <div class="modal-fields-row2">
-          <input class="modal-input" id="formYear" placeholder="Année (ex: 2024)" type="number" min="2000" max="2099"/>
-          <select class="modal-select" id="formType">
+      <!-- FORMATIONS LIST -->
+      <div class="modal-sec-title cyan">▸ Formations effectuées</div>
+      <div class="modal-list" id="mtFormList"></div>
+      <!-- ADD FORMATION -->
+      <div class="modal-sec-title amber">+ Ajouter une formation</div>
+      <div class="form-row"><input class="form-input" id="ftName" placeholder="Nom de la formation…"/></div>
+      <div class="form-grid2">
+        <div class="form-row"><input class="form-input" id="ftYear" type="number" placeholder="Année" min="2000" max="2099"/></div>
+        <div class="form-row">
+          <select class="form-select" id="ftType">
             <option value="">Type (optionnel)</option>
-            <option value="EMT">EMT</option>
-            <option value="SECOURISME">Secourisme</option>
-            <option value="SAUVETAGE">Sauvetage</option>
-            <option value="MÉDICAL">Médical</option>
-            <option value="COMMANDEMENT">Commandement</option>
-            <option value="TECHNIQUE">Technique</option>
-            <option value="AUTRE">Autre</option>
+            <option>EMT</option><option>SECOURISME</option><option>SAUVETAGE</option>
+            <option>MÉDICAL</option><option>COMMANDEMENT</option><option>TECHNIQUE</option><option>AUTRE</option>
           </select>
         </div>
-        <button class="btn-modal-add" id="btnModalAdd">ENREGISTRER LA FORMATION</button>
+      </div>
+      <button class="btn-submit" id="btnAddFormation">ENREGISTRER FORMATION</button>
+      <div class="divider"></div>
+      <!-- DELETE TRAINER -->
+      <div class="modal-sec-title" style="color:var(--red)">⚠ Zone danger</div>
+      <button class="btn-action btn-red" style="width:100%;justify-content:center" id="btnDeleteTrainer">Supprimer ce formateur</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: ADD TRAINER ═══ -->
+<div class="modal-overlay" id="modalAddTrainer">
+  <div class="modal wide">
+    <div class="modal-hdr">
+      <div class="modal-hdr-info">
+        <div class="modal-hdr-kicker">NOUVEAU FORMATEUR</div>
+        <div class="modal-hdr-title">Ajouter un officier</div>
+      </div>
+      <button class="modal-close" data-close="modalAddTrainer">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row"><label class="form-label">Nom complet</label><input class="form-input" id="atName" placeholder="Ex: BENALI YOUSSEF"/></div>
+      <div class="form-grid2">
+        <div class="form-row">
+          <label class="form-label">Grade</label>
+          <select class="form-select" id="atGrade">
+            <option value="">Choisir…</option>
+            <option>LT</option><option>CNE</option><option>CAP</option><option>ADJ</option>
+            <option>ADJ/C</option><option>CDT</option><option>SGT</option><option>SGT/C</option>
+            <option>MEDECIN</option><option>INFIRMIERE</option><option>INF</option><option>AUTRE</option>
+          </select>
+        </div>
+        <div class="form-row"><label class="form-label">Unité</label><input class="form-input" id="atUnit" placeholder="Ex: CS MASSIRA"/></div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Région</label>
+        <select class="form-select" id="atRegion">
+          <option value="">Choisir…</option>
+          <option>CASABLANCA-SETTAT</option><option>FES-MEKNES</option>
+          <option>MARRAKECH-SAFI</option><option>RABAT-SALE-KENITRA</option>
+          <option>TANGER-TETOUAN-AL HOCEIMA</option><option>SOUSS-MASSA</option>
+          <option>DRÂA-TAFILALET</option><option>ORIENTAL</option>
+          <option>BENI MELLAL-KHENIFRA</option><option>GUELMIM-OUED NOUN</option>
+          <option>NON-PRECISÉ</option>
+        </select>
+      </div>
+      <button class="btn-submit" id="btnConfirmAddTrainer">AJOUTER LE FORMATEUR</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: ADD SESSION ═══ -->
+<div class="modal-overlay" id="modalAddSession">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-hdr-info">
+        <div class="modal-hdr-kicker">PROGRAMME EMT</div>
+        <div class="modal-hdr-title">Nouvelle session</div>
+      </div>
+      <button class="modal-close" data-close="modalAddSession">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row"><label class="form-label">Nom de la session</label><input class="form-input" id="ssName" placeholder="Ex: Session Mois 5"/></div>
+      <div class="form-grid2">
+        <div class="form-row"><label class="form-label">Date début</label><input class="form-input" id="ssStart" type="date"/></div>
+        <div class="form-row"><label class="form-label">Date fin</label><input class="form-input" id="ssEnd" type="date"/></div>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row"><label class="form-label">Lieu</label><input class="form-input" id="ssLocation" placeholder="Ex: ENPC"/></div>
+        <div class="form-row"><label class="form-label">Volume horaire</label><input class="form-input" id="ssHours" type="number" placeholder="120"/></div>
+      </div>
+      <div class="form-row"><label class="form-label">Notes</label><textarea class="form-textarea" id="ssNotes" placeholder="Informations complémentaires…"></textarea></div>
+      <button class="btn-submit" id="btnConfirmAddSession">CRÉER LA SESSION</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: CONFIRM DELETE ═══ -->
+<div class="modal-overlay" id="modalConfirm">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-hdr">
+      <div class="modal-hdr-info">
+        <div class="modal-hdr-title">Confirmer la suppression</div>
+      </div>
+      <button class="modal-close" data-close="modalConfirm">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="confirm-msg" id="confirmMsg"></p>
+      <div class="btn-row">
+        <button class="btn-action btn-red" style="justify-content:center" id="btnConfirmYes">Supprimer</button>
+        <button class="btn-action btn-green" style="justify-content:center" data-close="modalConfirm">Annuler</button>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-/* ─── DATA ─────────────────────────────────────────────── */
-const TRAINERS = [
+/* ─────────────────────────────────────────────────────────────
+   DATA
+───────────────────────────────────────────────────────────── */
+const INITIAL_TRAINERS = [
   {name:"ZIANI MEKKI",grade:"LT",unit:"MOHAMMADIA",region:"CASABLANCA-SETTAT"},
   {name:"CHAIBI NOUREDDINE",grade:"LT",unit:"UMRI CASA SETTAT",region:"CASABLANCA-SETTAT"},
   {name:"EL AYADI AMROU",grade:"CNE",unit:"AIN CHOCK",region:"CASABLANCA-SETTAT"},
@@ -599,30 +565,35 @@ const TRAINERS = [
   {name:"EL MAOUASY REDOUANE",grade:"ADJ",unit:"UMRI TANGER TETOUAN",region:"TANGER-TETOUAN-AL HOCEIMA"}
 ];
 
-/* ─── STORAGE ───────────────────────────────────────────── */
-const LS_KEY = 'emt_formations_v1';
-function loadFormations() {
-  try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }
-  catch { return {}; }
-}
-function saveFormations(data) {
-  localStorage.setItem(LS_KEY, JSON.stringify(data));
-}
-function trainerKey(t) { return `${t.name}__${t.region}`; }
+/* ─── LOCAL STORAGE ──────────────────────────────────────── */
+const LS_TRAINERS   = 'emt_trainers_v1';
+const LS_FORMATIONS = 'emt_formations_v1';
+const LS_SESSIONS   = 'emt_sessions_v1';
 
-/* ─── STATE ─────────────────────────────────────────────── */
-let activeRegion   = 'all';
-let activeFormation = null; // formation name filter
-let query          = '';
-let formations     = loadFormations(); // { "NAME__REGION": [{name, year, type}] }
-let modalTrainer   = null;
+function ls(key, def){ try{ return JSON.parse(localStorage.getItem(key))||def; }catch{ return def; } }
+function lsSave(key,val){ localStorage.setItem(key, JSON.stringify(val)); }
 
-/* ─── DOM ───────────────────────────────────────────────── */
-const $ = id => document.getElementById(id);
+let trainers   = ls(LS_TRAINERS, null) || [...INITIAL_TRAINERS.map(t=>({...t,id:uid()}))];
+let formations = ls(LS_FORMATIONS, {});
+let sessions   = ls(LS_SESSIONS, []);
 
-/* ─── HELPERS ───────────────────────────────────────────── */
-function gradeKey(g) {
-  const u = g.toUpperCase();
+function save(){ lsSave(LS_TRAINERS,trainers); lsSave(LS_FORMATIONS,formations); lsSave(LS_SESSIONS,sessions); }
+
+function uid(){ return Math.random().toString(36).slice(2,9); }
+function trainerKey(t){ return t.id || (t.name+'__'+t.region); }
+function getFormations(t){ return formations[trainerKey(t)]||[]; }
+
+/* ─── STATE ────────────────────────────────────────────────── */
+let activeRegion    = 'all';
+let activeFormation = null;
+let query           = '';
+let currentTab      = 'directory';
+let editingTrainer  = null;
+let confirmCb       = null;
+
+/* ─── HELPERS ────────────────────────────────────────────── */
+function gradeKey(g){
+  const u=g.toUpperCase();
   if(u.startsWith('LT'))  return 'LT';
   if(u.startsWith('CNE')) return 'CNE';
   if(u.startsWith('CAP')) return 'CAP';
@@ -633,291 +604,435 @@ function gradeKey(g) {
   if(u.startsWith('INF')) return 'INF';
   return 'OTHER';
 }
-function hl(str, q) {
+function hl(str,q){
   if(!q) return str;
   return str.replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'), '<mark>$1</mark>');
 }
-function group(list) {
-  const m = {};
-  list.forEach(t => {
-    const r = t.region||'NON-PRECISÉ';
-    const u = (!t.unit||t.unit.toLowerCase()==='non précisé') ? '— Non précisé' : t.unit;
-    if(!m[r]) m[r]={};
-    if(!m[r][u]) m[r][u]=[];
+function groupByRegionUnit(list){
+  const m={};
+  list.forEach(t=>{
+    const r=t.region||'NON-PRECISÉ';
+    const u=(!t.unit||t.unit.toLowerCase()==='non précisé')?'— Non précisé':t.unit;
+    if(!m[r])m[r]={};
+    if(!m[r][u])m[r][u]=[];
     m[r][u].push(t);
   });
   return m;
 }
-
-/* ─── FORMATION HELPERS ─────────────────────────────────── */
-function getTrainerFormations(t) {
-  return formations[trainerKey(t)] || [];
+function getAllFormationNames(){
+  const s=new Set();
+  Object.values(formations).forEach(list=>list.forEach(f=>s.add(f.name.toUpperCase())));
+  return [...s].sort();
 }
-function getAllFormationNames() {
-  const names = new Set();
-  Object.values(formations).forEach(list => list.forEach(f => names.add(f.name.toUpperCase())));
-  return [...names].sort();
-}
-function formationCountByName(name) {
-  let c = 0;
-  Object.values(formations).forEach(list => list.forEach(f => { if(f.name.toUpperCase()===name) c++; }));
+function formationCountByName(name){
+  let c=0;
+  Object.values(formations).forEach(list=>list.forEach(f=>{if(f.name.toUpperCase()===name)c++;}));
   return c;
 }
+function showModal(id){ document.getElementById(id).classList.add('open'); }
+function hideModal(id){ document.getElementById(id).classList.remove('open'); }
 
-/* ─── BUILD SIDEBAR NAV ─────────────────────────────────── */
-function buildRegionNav() {
-  const counts = {};
-  TRAINERS.forEach(t => { counts[t.region]=(counts[t.region]||0)+1; });
-  const nav = $('regionNav');
-  nav.innerHTML = '';
-  const mk = (label, val, count) => {
-    const b = document.createElement('button');
-    b.className = 'region-btn' + (activeRegion===val?' active':'');
-    b.dataset.val = val;
-    b.innerHTML = `<span class="region-btn-left"><span class="region-indicator"></span>${label}</span><span class="r-count">${count}</span>`;
-    b.addEventListener('click', () => { activeRegion=val; render(); });
+/* ─── BUILD SIDEBAR ──────────────────────────────────────── */
+function buildSidebar(){
+  // Region nav
+  const counts={};
+  trainers.forEach(t=>{ counts[t.region]=(counts[t.region]||0)+1; });
+  const nav=document.getElementById('regionNav');
+  nav.innerHTML='';
+  const mkR=(label,val,count)=>{
+    const b=document.createElement('button');
+    b.className='nav-btn'+(activeRegion===val?' active':'');
+    b.dataset.val=val;
+    b.innerHTML=`<span class="nav-btn-left"><span class="nav-dot"></span>${label}</span><span class="nb-count">${count}</span>`;
+    b.addEventListener('click',()=>{ activeRegion=val; renderDirectory(); buildSidebar(); });
     nav.appendChild(b);
   };
-  mk('Toutes régions','all',TRAINERS.length);
-  Object.keys(counts).sort().forEach(r => mk(r,r,counts[r]));
-}
+  mkR('Toutes régions','all',trainers.length);
+  Object.keys(counts).sort().forEach(r=>mkR(r,r,counts[r]));
 
-function buildFormationFilter() {
-  const list = $('formationFilterList');
-  const names = getAllFormationNames();
-  if(!names.length) {
-    list.innerHTML = '<div class="no-formations-msg">Aucune formation enregistrée</div>';
-    return;
-  }
-  list.innerHTML = '';
-  names.forEach(name => {
-    const count = formationCountByName(name);
-    const b = document.createElement('button');
-    b.className = 'form-filter-btn' + (activeFormation===name?' active':'');
-    b.dataset.name = name;
-    b.innerHTML = `<span class="form-filter-btn-left"><span class="form-indicator"></span>${name}</span><span class="f-count">${count}</span>`;
-    b.addEventListener('click', () => {
-      activeFormation = activeFormation===name ? null : name;
-      render();
-    });
-    list.appendChild(b);
+  // Formation filter
+  const fNav=document.getElementById('formationFilterNav');
+  const fNames=getAllFormationNames();
+  if(!fNames.length){ fNav.innerHTML='<div class="no-items-msg">Aucune formation enregistrée</div>'; return; }
+  fNav.innerHTML='';
+  fNames.forEach(name=>{
+    const cnt=formationCountByName(name);
+    const b=document.createElement('button');
+    b.className='nav-btn'+(activeFormation===name?' active-cyan':'');
+    b.dataset.name=name;
+    b.innerHTML=`<span class="nav-btn-left"><span class="nav-dot"></span>${name}</span><span class="nb-count">${cnt}</span>`;
+    b.addEventListener('click',()=>{ activeFormation=activeFormation===name?null:name; renderDirectory(); buildSidebar(); });
+    fNav.appendChild(b);
   });
 }
 
-/* ─── FILTER BANNER ─────────────────────────────────────── */
-function updateBanner() {
-  const banner = $('filterBanner');
-  if(activeFormation) {
-    banner.classList.add('visible');
-    $('bannerFormName').textContent = activeFormation;
-  } else {
-    banner.classList.remove('visible');
-  }
-}
+/* ─── RENDER DIRECTORY ───────────────────────────────────── */
+function renderDirectory(){
+  const q=query.toLowerCase();
+  const banner=document.getElementById('filterBanner');
+  if(activeFormation){ banner.classList.add('visible'); document.getElementById('bannerFormName').textContent=activeFormation; }
+  else banner.classList.remove('visible');
 
-/* ─── MAIN RENDER ───────────────────────────────────────── */
-function render() {
-  const q = query.toLowerCase();
-
-  // Update nav active states
-  document.querySelectorAll('.region-btn').forEach(b => b.classList.toggle('active', b.dataset.val===activeRegion));
-  document.querySelectorAll('.form-filter-btn').forEach(b => b.classList.toggle('active', b.dataset.name===activeFormation));
-  updateBanner();
-
-  // Filter
-  const list = TRAINERS.filter(t => {
-    const mr = activeRegion==='all' || t.region===activeRegion;
-    const mq = !q || [t.name,t.grade,t.unit,t.region].join(' ').toLowerCase().includes(q);
-    let mf = true;
-    if(activeFormation) {
-      const tf = getTrainerFormations(t);
-      mf = tf.some(f => f.name.toUpperCase()===activeFormation);
-    }
-    return mr && mq && mf;
+  const list=trainers.filter(t=>{
+    const mr=activeRegion==='all'||t.region===activeRegion;
+    const mq=!q||[t.name,t.grade,t.unit,t.region].join(' ').toLowerCase().includes(q);
+    const mf=!activeFormation||getFormations(t).some(f=>f.name.toUpperCase()===activeFormation);
+    return mr&&mq&&mf;
   });
 
-  // Stats (always from full filtered list ignoring formation filter for counts)
-  const listForStats = TRAINERS.filter(t => {
-    const mr = activeRegion==='all' || t.region===activeRegion;
-    const mq = !q || [t.name,t.grade,t.unit,t.region].join(' ').toLowerCase().includes(q);
-    return mr && mq;
-  });
-  const grouped = group(list);
-  const regions = Object.keys(grouped).sort();
-  const units = new Set(listForStats.map(t=>t.unit));
+  const grouped=groupByRegionUnit(list);
+  const regions=Object.keys(grouped).sort();
+  const units=new Set(trainers.map(t=>t.unit));
+  document.getElementById('totalStat').textContent=list.length;
+  document.getElementById('regionStat').textContent=regions.length;
+  document.getElementById('unitStat').textContent=units.size;
 
-  $('totalStat').textContent   = list.length;
-  $('regionStat').textContent  = regions.length;
-  $('unitStat').textContent    = units.size;
-  $('resultCount').textContent = list.length;
-  $('activeCrumb').textContent = activeRegion==='all'?'TOUTES RÉGIONS':activeRegion;
+  const wrap=document.getElementById('groupsWrap');
+  wrap.innerHTML='';
+  if(!list.length){ document.getElementById('emptyState').classList.remove('hidden'); return; }
+  document.getElementById('emptyState').classList.add('hidden');
 
-  const wrap = $('groupsWrap');
-  wrap.innerHTML = '';
-
-  if(!list.length) { $('emptyState').classList.remove('hidden'); return; }
-  $('emptyState').classList.add('hidden');
-
-  regions.forEach(region => {
-    const um = grouped[region];
-    const unames = Object.keys(um).sort();
-    const tot = unames.reduce((s,u)=>s+um[u].length, 0);
-
-    const sec = document.createElement('div');
-    sec.className = 'region-section';
-
-    let unitsHTML = unames.map(u => {
-      const trainersHTML = um[u].map(t => {
-        const tf = getTrainerFormations(t);
-        const formTagsHTML = tf.length
-          ? tf.map(f => `<span class="formation-tag">${f.name}${f.year?' · '+f.year:''}</span>`).join('')
-          : '';
-        const key = trainerKey(t);
-        return `
-          <div class="trainer-row" data-key="${key}">
-            <div class="trainer-row-top">
-              <div class="tr-left">
-                <div class="tr-name">${hl(t.name,q)}</div>
-              </div>
-              <span class="tr-grade g-${gradeKey(t.grade)}">${t.grade}</span>
-            </div>
-            ${formTagsHTML ? `<div class="trainer-formations">${formTagsHTML}</div>` : ''}
-            <button class="btn-add-formation" data-key="${key}">
-              <span class="plus">+</span> ${tf.length ? 'modifier formations' : 'ajouter formation'}
-            </button>
+  regions.forEach(region=>{
+    const um=grouped[region];
+    const unames=Object.keys(um).sort();
+    const tot=unames.reduce((s,u)=>s+um[u].length,0);
+    const sec=document.createElement('div');
+    sec.className='region-section';
+    const unitsHTML=unames.map(u=>{
+      const rows=um[u].map(t=>{
+        const tf=getFormations(t);
+        const tagsHTML=tf.map(f=>`<span class="f-tag">${f.name}${f.year?' · '+f.year:''}</span>`).join('');
+        return `<div class="trainer-row">
+          <div class="tr-top">
+            <div class="tr-left"><div class="tr-name">${hl(t.name,q)}</div></div>
+            <span class="tr-grade g-${gradeKey(t.grade)}">${t.grade}</span>
           </div>
-        `;
+          ${tagsHTML?`<div class="trainer-formations">${tagsHTML}</div>`:''}
+          <button class="btn-edit-trainer" data-id="${trainerKey(t)}">+ ${tf.length?'formations ('+tf.length+')':'ajouter formation'}</button>
+        </div>`;
       }).join('');
-
-      return `
-        <div class="unit-cell">
-          <div class="unit-top">
-            <div class="unit-name">${hl(u.replace(/^— /,''),q)}</div>
-            <div class="unit-count">${um[u].length}</div>
-          </div>
-          <div class="trainer-list">${trainersHTML}</div>
-        </div>
-      `;
+      return `<div class="unit-cell">
+        <div class="unit-top"><div class="unit-name">${hl(u.replace(/^— /,''),q)}</div><div class="unit-count">${um[u].length}</div></div>
+        <div class="trainer-list">${rows}</div>
+      </div>`;
     }).join('');
-
-    sec.innerHTML = `
-      <div class="region-head">
-        <div class="region-accent-bar"></div>
-        <div class="region-head-inner">
-          <div class="region-head-title">${hl(region,q)}</div>
-          <div class="region-head-right">
-            <span class="rh-chip hi">${tot} formateur${tot>1?'s':''}</span>
-            <span class="rh-chip">${unames.length} unité${unames.length>1?'s':''}</span>
-          </div>
-        </div>
-      </div>
-      <div class="units-grid">${unitsHTML}</div>
-    `;
+    sec.innerHTML=`<div class="region-head"><div class="region-accent"></div>
+      <div class="region-head-inner">
+        <div class="region-head-title">${hl(region,q)}</div>
+        <div class="rh-right"><span class="rh-chip hi">${tot} form.</span><span class="rh-chip">${unames.length} unités</span></div>
+      </div></div>
+      <div class="units-grid">${unitsHTML}</div>`;
     wrap.appendChild(sec);
   });
 
-  // Bind "add formation" buttons
-  wrap.querySelectorAll('.btn-add-formation').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      const key = btn.dataset.key;
-      const trainer = TRAINERS.find(t => trainerKey(t)===key);
-      if(trainer) openModal(trainer);
+  wrap.querySelectorAll('.btn-edit-trainer').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const t=trainers.find(t=>trainerKey(t)===btn.dataset.id);
+      if(t) openTrainerModal(t);
     });
   });
 }
 
-/* ─── MODAL ─────────────────────────────────────────────── */
-function openModal(trainer) {
-  modalTrainer = trainer;
-  $('modalGrade').textContent = trainer.grade + ' · ' + trainer.region;
-  $('modalName').textContent  = trainer.name;
-  $('modalMeta').textContent  = 'Unité : ' + trainer.unit;
-  $('formInput').value = '';
-  $('formYear').value  = '';
-  $('formType').value  = '';
-  renderModalList();
-  $('modalOverlay').classList.add('open');
-  setTimeout(() => $('formInput').focus(), 200);
+/* ─── TRAINER MODAL ──────────────────────────────────────── */
+function openTrainerModal(t){
+  editingTrainer=t;
+  document.getElementById('mtkicker').textContent=t.grade+' · '+t.region;
+  document.getElementById('mtTitle').textContent=t.name;
+  document.getElementById('mtSub').textContent='Unité : '+t.unit;
+  document.getElementById('ftName').value='';
+  document.getElementById('ftYear').value='';
+  document.getElementById('ftType').value='';
+  renderModalFormList();
+  showModal('modalTrainer');
+  setTimeout(()=>document.getElementById('ftName').focus(),200);
 }
-
-function closeModal() {
-  $('modalOverlay').classList.remove('open');
-  modalTrainer = null;
-}
-
-function renderModalList() {
-  const list = $('modalFormationsList');
-  const tf = getTrainerFormations(modalTrainer);
-  if(!tf.length) {
-    list.innerHTML = '<div class="modal-no-formations">Aucune formation enregistrée pour cet officier.</div>';
-    return;
-  }
-  list.innerHTML = tf.map((f,i) => `
-    <div class="modal-formation-item">
-      <div>
-        <div class="modal-formation-name">${f.name}${f.type?' <span style="color:var(--olive-lt);font-size:0.65rem;">· '+f.type+'</span>':''}</div>
+function renderModalFormList(){
+  const list=document.getElementById('mtFormList');
+  const tf=getFormations(editingTrainer);
+  if(!tf.length){ list.innerHTML='<div class="no-items-msg">Aucune formation pour cet officier.</div>'; return; }
+  list.innerHTML=tf.map((f,i)=>`
+    <div class="modal-list-item">
+      <div class="modal-list-item-main">
+        <div class="modal-list-item-name">${f.name}${f.type?' · <span style="color:var(--olive-lt);font-size:0.65rem">'+f.type+'</span>':''}</div>
+        ${f.year?`<div class="modal-list-item-sub">${f.year}</div>`:''}
       </div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        ${f.year ? `<span class="modal-formation-year">${f.year}</span>` : ''}
-        <button class="btn-remove-formation" data-idx="${i}" title="Supprimer">✕</button>
+      <button class="btn-remove" data-idx="${i}">✕</button>
+    </div>`).join('');
+  list.querySelectorAll('.btn-remove').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const key=trainerKey(editingTrainer);
+      formations[key]=formations[key].filter((_,i)=>i!==parseInt(btn.dataset.idx));
+      if(!formations[key].length) delete formations[key];
+      save(); renderModalFormList(); buildSidebar(); renderDirectory();
+    });
+  });
+}
+function addFormationToTrainer(){
+  const name=document.getElementById('ftName').value.trim();
+  if(!name){ document.getElementById('ftName').style.borderColor='var(--red)'; setTimeout(()=>document.getElementById('ftName').style.borderColor='',1200); return; }
+  const year=document.getElementById('ftYear').value.trim();
+  const type=document.getElementById('ftType').value;
+  const key=trainerKey(editingTrainer);
+  if(!formations[key]) formations[key]=[];
+  formations[key].push({name:name.toUpperCase(), year:year||null, type:type||null});
+  save();
+  document.getElementById('ftName').value='';
+  document.getElementById('ftYear').value='';
+  document.getElementById('ftType').value='';
+  renderModalFormList(); buildSidebar(); renderDirectory();
+}
+
+/* ─── ADD TRAINER ────────────────────────────────────────── */
+function confirmAddTrainer(){
+  const name=document.getElementById('atName').value.trim();
+  const grade=document.getElementById('atGrade').value;
+  const unit=document.getElementById('atUnit').value.trim();
+  const region=document.getElementById('atRegion').value;
+  if(!name||!grade||!region){ alert('Nom, grade et région sont obligatoires.'); return; }
+  trainers.push({id:uid(), name:name.toUpperCase(), grade, unit:unit||'Non précisé', region});
+  save(); hideModal('modalAddTrainer');
+  document.getElementById('atName').value='';
+  document.getElementById('atGrade').value='';
+  document.getElementById('atUnit').value='';
+  document.getElementById('atRegion').value='';
+  buildSidebar(); renderDirectory();
+}
+
+/* ─── DELETE TRAINER ─────────────────────────────────────── */
+function deleteTrainer(){
+  const key=trainerKey(editingTrainer);
+  trainers=trainers.filter(t=>trainerKey(t)!==key);
+  delete formations[key];
+  save(); hideModal('modalTrainer'); hideModal('modalConfirm');
+  buildSidebar(); renderDirectory();
+}
+
+/* ─── SESSIONS ───────────────────────────────────────────── */
+function renderSessions(){
+  const grid=document.getElementById('sessionsGrid');
+  const empty=document.getElementById('sessionsEmpty');
+  if(!sessions.length){ grid.innerHTML=''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  grid.innerHTML=sessions.map((s,i)=>`
+    <div class="session-card">
+      <div class="session-card-head">
+        <div>
+          <div class="session-card-name">${s.name}</div>
+          ${s.start?`<div class="session-card-date">${s.start}${s.end?' → '+s.end:''}</div>`:''}
+        </div>
+        <span class="session-badge">ACTIF</span>
+      </div>
+      <div class="session-card-body">
+        ${s.location?`<div class="session-meta">Lieu : <span>${s.location}</span></div>`:''}
+        ${s.hours?`<div class="session-meta">Volume : <span>${s.hours}h</span></div>`:''}
+        ${s.notes?`<div class="session-meta" style="margin-top:8px;color:var(--text3)">${s.notes}</div>`:''}
+        <div class="session-actions">
+          <button class="btn-action btn-red" data-del="${i}">Supprimer</button>
+        </div>
+      </div>
+    </div>`).join('');
+  grid.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const idx=parseInt(btn.dataset.del);
+      openConfirm(`Supprimer la session "${sessions[idx].name}" ?`, ()=>{
+        sessions.splice(idx,1); save(); hideModal('modalConfirm'); renderSessions();
+      });
+    });
+  });
+}
+function confirmAddSession(){
+  const name=document.getElementById('ssName').value.trim();
+  if(!name){ document.getElementById('ssName').style.borderColor='var(--red)'; setTimeout(()=>document.getElementById('ssName').style.borderColor='',1200); return; }
+  sessions.push({
+    id:uid(), name,
+    start:document.getElementById('ssStart').value||null,
+    end:document.getElementById('ssEnd').value||null,
+    location:document.getElementById('ssLocation').value.trim()||null,
+    hours:document.getElementById('ssHours').value||null,
+    notes:document.getElementById('ssNotes').value.trim()||null
+  });
+  save(); hideModal('modalAddSession');
+  ['ssName','ssStart','ssEnd','ssLocation','ssHours','ssNotes'].forEach(id=>document.getElementById(id).value='');
+  renderSessions();
+}
+
+/* ─── DASHBOARD ──────────────────────────────────────────── */
+function renderDashboard(){
+  const dash=document.getElementById('dashContent');
+  const totalF=trainers.length;
+  const regionCounts={};
+  trainers.forEach(t=>{ regionCounts[t.region]=(regionCounts[t.region]||0)+1; });
+  const gradeCounts={};
+  trainers.forEach(t=>{ const g=gradeKey(t.grade); gradeCounts[g]=(gradeCounts[g]||0)+1; });
+  const fNames=getAllFormationNames();
+  const withFormation=trainers.filter(t=>getFormations(t).length>0).length;
+
+  dash.innerHTML=`
+    <div class="dash-grid">
+      <div class="dash-card c-olive">
+        <div class="dash-card-label">Total formateurs</div>
+        <div class="dash-card-value">${totalF}</div>
+        <div class="dash-card-sub">Annuaire complet</div>
+      </div>
+      <div class="dash-card c-amber">
+        <div class="dash-card-label">Régions couvertes</div>
+        <div class="dash-card-value">${Object.keys(regionCounts).length}</div>
+        <div class="dash-card-sub">Sur 12 régions nationales</div>
+      </div>
+      <div class="dash-card c-cyan">
+        <div class="dash-card-label">Formations enregistrées</div>
+        <div class="dash-card-value">${fNames.length}</div>
+        <div class="dash-card-sub">${withFormation} officiers formés</div>
+      </div>
+      <div class="dash-card c-red">
+        <div class="dash-card-label">Sessions créées</div>
+        <div class="dash-card-value">${sessions.length}</div>
+        <div class="dash-card-sub">Programmes actifs</div>
       </div>
     </div>
-  `).join('');
 
-  list.querySelectorAll('.btn-remove-formation').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.idx);
-      const key = trainerKey(modalTrainer);
-      formations[key] = formations[key].filter((_,i)=>i!==idx);
-      if(!formations[key].length) delete formations[key];
-      saveFormations(formations);
-      renderModalList();
-      buildFormationFilter();
-      render();
+    <div class="dash-section-title">Répartition par région</div>
+    <div class="bar-chart">
+      ${Object.entries(regionCounts).sort((a,b)=>b[1]-a[1]).map(([r,c])=>`
+        <div class="bar-row">
+          <div class="bar-label" title="${r}">${r}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${Math.round(c/totalF*100)}%"></div></div>
+          <div class="bar-val">${c}</div>
+        </div>`).join('')}
+    </div>
+
+    <div class="dash-section-title">Répartition par grade</div>
+    <div class="grade-grid">
+      ${Object.entries(gradeCounts).sort((a,b)=>b[1]-a[1]).map(([g,c])=>`
+        <div class="grade-card">
+          <div class="grade-card-name tr-grade g-${g}" style="display:inline-block">${g}</div>
+          <div class="grade-card-count">${c}</div>
+        </div>`).join('')}
+    </div>
+
+    ${fNames.length?`
+    <div class="dash-section-title">Formations les plus répandues</div>
+    <div class="formation-dash-list">
+      ${fNames.map(n=>`<div class="fdash-row"><div class="fdash-name">${n}</div><div class="fdash-count">${formationCountByName(n)}</div></div>`).join('')}
+    </div>`:''}
+  `;
+}
+
+/* ─── EXPORT EXCEL ───────────────────────────────────────── */
+function exportExcel(){
+  const rows=trainers.map(t=>{
+    const tf=getFormations(t);
+    return {
+      Nom: t.name, Grade: t.grade, Unité: t.unit, Région: t.region,
+      Formations: tf.map(f=>f.name+(f.year?' ('+f.year+')':'')).join(', ')
+    };
+  });
+  const ws=XLSX.utils.json_to_sheet(rows);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Formateurs EMT');
+  XLSX.writeFile(wb,'EMT_Formateurs.xlsx');
+}
+
+/* ─── EXPORT PDF ─────────────────────────────────────────── */
+function exportPDF(){
+  const win=window.open('','_blank');
+  const regionGroups=groupByRegionUnit(trainers);
+  let html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>EMT — Annuaire Formateurs</title>
+  <style>
+    body{font-family:Arial,sans-serif;font-size:11px;color:#111;margin:20px}
+    h1{font-size:18px;margin-bottom:4px}
+    .sub{color:#666;font-size:10px;margin-bottom:16px}
+    h2{font-size:13px;background:#1a2e0a;color:#8ab050;padding:6px 10px;margin:16px 0 6px;letter-spacing:1px}
+    h3{font-size:11px;color:#444;margin:10px 0 4px;text-transform:uppercase;letter-spacing:0.5px;border-left:3px solid #6b8c42;padding-left:7px}
+    table{width:100%;border-collapse:collapse;margin-bottom:6px}
+    th{background:#f0f5e8;text-align:left;padding:4px 8px;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;border:1px solid #ddd}
+    td{padding:4px 8px;border:1px solid #eee;vertical-align:top}
+    .grade{font-weight:bold;color:#3a5c1a}
+    .ftag{display:inline-block;background:#e8f5fb;color:#2a7a8a;border:1px solid #b8e0e8;padding:1px 5px;font-size:9px;margin:1px;border-radius:2px}
+    @media print{body{margin:10px}}
+  </style></head><body>
+  <h1>EMT — Annuaire des Formateurs</h1>
+  <div class="sub">Protection Civile · Session Mois 4 · Total : ${trainers.length} formateurs · Exporté le ${new Date().toLocaleDateString('fr-FR')}</div>`;
+
+  Object.keys(regionGroups).sort().forEach(region=>{
+    const um=regionGroups[region];
+    const tot=Object.values(um).reduce((s,l)=>s+l.length,0);
+    html+=`<h2>${region} — ${tot} formateur(s)</h2>`;
+    Object.keys(um).sort().forEach(unit=>{
+      html+=`<h3>${unit.replace(/^— /,'')}</h3>
+      <table><tr><th>#</th><th>Nom</th><th>Grade</th><th>Formations</th></tr>
+      ${um[unit].map((t,i)=>{
+        const tf=getFormations(t);
+        return `<tr><td>${i+1}</td><td>${t.name}</td><td class="grade">${t.grade}</td>
+        <td>${tf.length?tf.map(f=>`<span class="ftag">${f.name}${f.year?' '+f.year:''}</span>`).join(''):'—'}</td></tr>`;
+      }).join('')}</table>`;
     });
   });
+  html+='</body></html>';
+  win.document.write(html);
+  win.document.close();
+  setTimeout(()=>win.print(), 400);
 }
 
-function addFormation() {
-  const name = $('formInput').value.trim();
-  if(!name) { $('formInput').focus(); $('formInput').style.borderColor='var(--red)'; setTimeout(()=>$('formInput').style.borderColor='',1200); return; }
-  const year = $('formYear').value.trim();
-  const type = $('formType').value;
-  const key  = trainerKey(modalTrainer);
-  if(!formations[key]) formations[key] = [];
-  formations[key].push({ name: name.toUpperCase(), year: year||null, type: type||null });
-  saveFormations(formations);
-  $('formInput').value = '';
-  $('formYear').value  = '';
-  $('formType').value  = '';
-  renderModalList();
-  buildFormationFilter();
-  render();
+/* ─── CONFIRM MODAL ──────────────────────────────────────── */
+function openConfirm(msg, cb){
+  document.getElementById('confirmMsg').textContent=msg;
+  confirmCb=cb;
+  showModal('modalConfirm');
 }
+
+/* ─── TABS ───────────────────────────────────────────────── */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    currentTab=btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===currentTab));
+    document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+currentTab));
+    if(currentTab==='dashboard') renderDashboard();
+    if(currentTab==='sessions') renderSessions();
+  });
+});
 
 /* ─── EVENTS ─────────────────────────────────────────────── */
-$('searchInput').addEventListener('input', e => {
-  query = e.target.value.trim();
-  $('clearBtn').classList.toggle('hidden', !query);
-  render();
+document.getElementById('searchInput').addEventListener('input',e=>{
+  query=e.target.value.trim();
+  document.getElementById('clearBtn').classList.toggle('hidden',!query);
+  renderDirectory();
 });
-$('clearBtn').addEventListener('click', () => {
-  $('searchInput').value=''; query='';
-  $('clearBtn').classList.add('hidden');
-  $('searchInput').focus(); render();
+document.getElementById('clearBtn').addEventListener('click',()=>{
+  document.getElementById('searchInput').value=''; query='';
+  document.getElementById('clearBtn').classList.add('hidden');
+  document.getElementById('searchInput').focus(); renderDirectory();
 });
-$('modalClose').addEventListener('click', closeModal);
-$('modalOverlay').addEventListener('click', e => { if(e.target===$('modalOverlay')) closeModal(); });
-document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
-$('btnModalAdd').addEventListener('click', addFormation);
-$('formInput').addEventListener('keydown', e => { if(e.key==='Enter') addFormation(); });
-$('bannerClearBtn').addEventListener('click', () => { activeFormation=null; render(); buildFormationFilter(); });
+document.getElementById('bannerClearBtn').addEventListener('click',()=>{ activeFormation=null; renderDirectory(); buildSidebar(); });
+document.getElementById('btnAddTrainer').addEventListener('click',()=>showModal('modalAddTrainer'));
+document.getElementById('btnConfirmAddTrainer').addEventListener('click',confirmAddTrainer);
+document.getElementById('btnAddFormation').addEventListener('click',addFormationToTrainer);
+document.getElementById('ftName').addEventListener('keydown',e=>{ if(e.key==='Enter') addFormationToTrainer(); });
+document.getElementById('btnDeleteTrainer').addEventListener('click',()=>{
+  hideModal('modalTrainer');
+  openConfirm(`Supprimer "${editingTrainer.name}" de l'annuaire ?`, deleteTrainer);
+});
+document.getElementById('btnConfirmYes').addEventListener('click',()=>{ if(confirmCb) confirmCb(); });
+document.getElementById('btnAddSession').addEventListener('click',()=>showModal('modalAddSession'));
+document.getElementById('btnConfirmAddSession').addEventListener('click',confirmAddSession);
+document.getElementById('btnExportExcel').addEventListener('click',exportExcel);
+document.getElementById('btnExportPDF').addEventListener('click',exportPDF);
 
-/* ─── INIT ─────────────────────────────────────────────── */
-buildRegionNav();
-buildFormationFilter();
-render();
+document.querySelectorAll('.modal-close,[data-close]').forEach(btn=>{
+  btn.addEventListener('click',()=>hideModal(btn.dataset.close||btn.closest('.modal-overlay').id));
+});
+document.querySelectorAll('.modal-overlay').forEach(ov=>{
+  ov.addEventListener('click',e=>{ if(e.target===ov) hideModal(ov.id); });
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(ov=>hideModal(ov.id)); });
+
+/* ─── INIT ───────────────────────────────────────────────── */
+// Ensure all trainers have IDs
+trainers = trainers.map(t=>({...t, id: t.id||uid()}));
+save();
+buildSidebar();
+renderDirectory();
 </script>
 </body>
 </html>
